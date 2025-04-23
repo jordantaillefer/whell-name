@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
-import { Trash2, Plus, RotateCw } from "lucide-react"
+import { Trash2, Plus, RotateCw, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -79,6 +79,10 @@ export default function NameWheel() {
   const [rotationAngle, setRotationAngle] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
   const [buttonMode, setButtonMode] = useState<"spin" | "remove">("spin")
+  // Nouveaux états pour le timer
+  const [timerActive, setTimerActive] = useState(false)
+  const [timeLeft, setTimeLeft] = useState(120) // 2 minutes en secondes
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Track if we're updating from URL to prevent loops
   const isUpdatingFromUrl = useRef(false)
@@ -111,6 +115,47 @@ export default function NameWheel() {
       setNames(newNames)
     }
   }, [searchParams, names])
+
+  // Fonction pour démarrer le timer
+  const startTimer = () => {
+    if (timerActive) return
+    setTimerActive(true)
+    setTimeLeft(120)
+    
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timerRef.current!)
+          setTimerActive(false)
+          return 0
+        }
+        return prevTime - 1
+      })
+    }, 1000)
+  }
+
+  // Nettoyer le timer quand le composant est démonté
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
+    }
+  }, [])
+
+  // Calculer la couleur du timer en fonction du temps restant
+  const getTimerColor = () => {
+    if (timeLeft > 60) return 'bg-emerald-600'
+    if (timeLeft > 30) return 'bg-amber-500'
+    return 'bg-red-600'
+  }
+
+  // Calculer l'intensité de l'animation de pulsation
+  const getPulseIntensity = () => {
+    if (timeLeft > 60) return 'animate-pulse'
+    if (timeLeft > 30) return 'animate-pulse'
+    return 'animate-pulse animate-duration-500'
+  }
 
   // Add a new name to the wheel
   const addName = (e: React.FormEvent) => {
@@ -340,6 +385,22 @@ export default function NameWheel() {
               <div className="text-2xl font-bold mt-2 p-4 bg-emerald-100 text-emerald-800 rounded-lg animate-pulse">
                 {selectedName}
               </div>
+              
+              {/* Nouveau bouton de timer */}
+              {!timerActive ? (
+                <Button
+                  onClick={startTimer}
+                  className="mt-4 px-8 bg-emerald-600 hover:bg-emerald-700"
+                  size="lg"
+                >
+                  <Clock className="h-5 w-5 mr-2" />
+                  Démarrer le Timer (2 min)
+                </Button>
+              ) : (
+                <div className={`mt-4 p-4 rounded-lg text-white text-2xl font-bold ${getTimerColor()} ${getPulseIntensity()}`}>
+                  {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -418,6 +479,8 @@ export default function NameWheel() {
               </>
             )}
           </Button>
+
+          
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
             {names.length < 2 && buttonMode === "spin"
