@@ -172,6 +172,13 @@ export default function NameWheel() {
     if (nameToRemove === selectedName) {
       setSelectedName(null)
       setButtonMode("spin")
+      // Réinitialiser le timer
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+      setTimerActive(false)
+      setTimeLeft(120)
     }
   }
 
