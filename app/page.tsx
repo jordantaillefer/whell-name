@@ -482,7 +482,7 @@ export default function NameWheel() {
             ) : (
               <>
                 <Trash2 className="h-5 w-5 mr-2" />
-                Supprimer le nom
+                Exterminer le nom
               </>
             )}
           </Button>
