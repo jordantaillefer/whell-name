@@ -213,6 +213,7 @@ export default function NameWheel() {
     if (nameToRemove === selectedName) {
       setSelectedName(null)
       setButtonMode("spin")
+      setCurrentHighlightIndex(null) // Reset highlight index
       // Réinitialiser le timer
       if (timerRef.current) {
         clearInterval(timerRef.current)
@@ -238,6 +239,23 @@ export default function NameWheel() {
       if (selectedName) {
         removeName(selectedName)
       }
+    }
+  }
+
+  // Remove selected name and immediately start animation
+  const handleRemoveAndSpin = () => {
+    if (selectedName) {
+      removeName(selectedName)
+      // Wait a tick for state to update before spinning again
+      setTimeout(() => {
+        if (displayMode === "wheel") {
+          spinWheel()
+        } else if (displayMode === "grid") {
+          animateGrid()
+        } else {
+          animateStar()
+        }
+      }, 50)
     }
   }
 
@@ -472,8 +490,8 @@ export default function NameWheel() {
     const cells = Array.from({ length: totalCells }, (_, i) => {
       const name = names[i] || null
       const color = name ? colors[i % colors.length] : null
-      const isHighlighted = i === currentHighlightIndex
-      const isSelected = name === selectedName
+      const isHighlighted = name !== null && i === currentHighlightIndex
+      const isSelected = name !== null && name === selectedName
 
       return { name, color, isHighlighted, isSelected, index: i }
     })
@@ -485,7 +503,7 @@ export default function NameWheel() {
             key={cell.index}
             className={cn(
               "aspect-square flex items-center justify-center rounded-lg font-semibold transition-all",
-              cell.name ? "text-white shadow-md" : "bg-muted/30",
+              cell.name ? "text-white shadow-md" : "bg-muted/50",
               cell.isHighlighted && "ring-4 ring-emerald-500 shadow-lg shadow-emerald-500/50",
               cell.isSelected && "ring-4 ring-emerald-600 animate-pulse"
             )}
@@ -787,31 +805,47 @@ export default function NameWheel() {
             </TabsContent>
           </Tabs>
 
-          <Button
-            onClick={handleButtonClick}
-            disabled={names.length < 2 || spinning || gridAnimating || starAnimating}
-            className={`mt-8 px-8 ${
-              buttonMode === "spin" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"
-            }`}
-            size="lg"
-          >
-            {(spinning || gridAnimating || starAnimating) ? (
-              <>
-                <RotateCw className="h-5 w-5 mr-2 animate-spin" />
-                {displayMode === "wheel" ? "Rotation en cours..." : displayMode === "grid" ? "Animation en cours..." : "Animation en cours..."}
-              </>
-            ) : buttonMode === "spin" ? (
-              <>
-                <RotateCw className="h-5 w-5 mr-2" />
-                {displayMode === "wheel" ? "Tourner la Roue" : displayMode === "grid" ? "Animer la Grille" : "Animer l'Étoile"}
-              </>
-            ) : (
-              <>
+          {buttonMode === "spin" || spinning || gridAnimating || starAnimating ? (
+            <Button
+              onClick={handleButtonClick}
+              disabled={names.length < 2 || spinning || gridAnimating || starAnimating}
+              className="mt-8 px-8 bg-emerald-600 hover:bg-emerald-700"
+              size="lg"
+            >
+              {(spinning || gridAnimating || starAnimating) ? (
+                <>
+                  <RotateCw className="h-5 w-5 mr-2 animate-spin" />
+                  {displayMode === "wheel" ? "Rotation en cours..." : displayMode === "grid" ? "Animation en cours..." : "Animation en cours..."}
+                </>
+              ) : (
+                <>
+                  <RotateCw className="h-5 w-5 mr-2" />
+                  {displayMode === "wheel" ? "Tourner la Roue" : displayMode === "grid" ? "Animer la Grille" : "Animer l'Étoile"}
+                </>
+              )}
+            </Button>
+          ) : (
+            <div className="mt-8 flex gap-3">
+              <Button
+                onClick={handleButtonClick}
+                disabled={names.length < 2}
+                className="px-6 bg-red-600 hover:bg-red-700"
+                size="lg"
+              >
                 <Trash2 className="h-5 w-5 mr-2" />
                 Passer au suivant
-              </>
-            )}
-          </Button>
+              </Button>
+              <Button
+                onClick={handleRemoveAndSpin}
+                disabled={names.length < 2}
+                className="px-6 bg-emerald-600 hover:bg-emerald-700"
+                size="lg"
+              >
+                <RotateCw className="h-5 w-5 mr-2" />
+                Passer et {displayMode === "wheel" ? "Tourner" : displayMode === "grid" ? "Animer" : "Animer"}
+              </Button>
+            </div>
+          )}
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
             {names.length < 2 && buttonMode === "spin"
