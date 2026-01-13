@@ -85,14 +85,16 @@ export default function NameWheel() {
   const [timerActive, setTimerActive] = useState(false)
   const [timeLeft, setTimeLeft] = useState(120) // 2 minutes en secondes
   const timerRef = useRef<NodeJS.Timeout | null>(null)
-  // États pour le mode grille
-  const [displayMode, setDisplayMode] = useState<"wheel" | "grid">(() => {
+  // États pour les modes d'affichage alternatifs
+  const [displayMode, setDisplayMode] = useState<"wheel" | "grid" | "star">(() => {
     const modeParam = searchParams.get("mode")
-    return modeParam === "grid" ? "grid" : "wheel"
+    return modeParam === "grid" ? "grid" : modeParam === "star" ? "star" : "wheel"
   })
   const [gridAnimating, setGridAnimating] = useState(false)
+  const [starAnimating, setStarAnimating] = useState(false)
   const [currentHighlightIndex, setCurrentHighlightIndex] = useState<number | null>(null)
   const gridIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const starIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Track if we're updating from URL to prevent loops
   const isUpdatingFromUrl = useRef(false)
@@ -122,7 +124,9 @@ export default function NameWheel() {
   // Sync state with URL on navigation, but only when searchParams actually change
   useEffect(() => {
     const newNames = getNamesFromUrl()
-    const newMode = searchParams.get("mode") === "grid" ? "grid" : "wheel"
+    const modeParam = searchParams.get("mode")
+    const newMode: "wheel" | "grid" | "star" =
+      modeParam === "grid" ? "grid" : modeParam === "star" ? "star" : "wheel"
 
     // Only update if the names or mode are different to prevent loops
     if (JSON.stringify(newNames) !== JSON.stringify(names) || newMode !== displayMode) {
@@ -150,7 +154,7 @@ export default function NameWheel() {
     }, 1000)
   }
 
-  // Nettoyer le timer et l'intervalle de la grille quand le composant est démonté
+  // Nettoyer les timers et intervalles quand le composant est démonté
   useEffect(() => {
     return () => {
       if (timerRef.current) {
@@ -158,6 +162,9 @@ export default function NameWheel() {
       }
       if (gridIntervalRef.current) {
         clearInterval(gridIntervalRef.current)
+      }
+      if (starIntervalRef.current) {
+        clearInterval(starIntervalRef.current)
       }
     }
   }, [])
@@ -206,8 +213,10 @@ export default function NameWheel() {
     if (buttonMode === "spin") {
       if (displayMode === "wheel") {
         spinWheel()
-      } else {
+      } else if (displayMode === "grid") {
         animateGrid()
+      } else {
+        animateStar()
       }
     } else {
       // Remove the selected name
@@ -268,6 +277,158 @@ export default function NameWheel() {
   const calculateGridSize = (nameCount: number) => {
     const size = Math.ceil(Math.sqrt(nameCount))
     return { rows: size, cols: size }
+  }
+
+  // Generate star points (alternating between outer and inner radius)
+  const generateStarPoints = (
+    centerX: number,
+    centerY: number,
+    branches: number,
+    outerRadius: number,
+    innerRadius: number
+  ): { x: number; y: number }[] => {
+    const points: { x: number; y: number }[] = []
+    const angleStep = (Math.PI * 2) / branches
+
+    for (let i = 0; i < branches; i++) {
+      // Pointe (outer point)
+      const outerAngle = i * angleStep - Math.PI / 2
+      points.push({
+        x: centerX + Math.cos(outerAngle) * outerRadius,
+        y: centerY + Math.sin(outerAngle) * outerRadius
+      })
+
+      // Creux (inner point)
+      const innerAngle = outerAngle + angleStep / 2
+      points.push({
+        x: centerX + Math.cos(innerAngle) * innerRadius,
+        y: centerY + Math.sin(innerAngle) * innerRadius
+      })
+    }
+
+    return points
+  }
+
+  // Generate star segments with SVG
+  const generateStarSegments = () => {
+    if (names.length === 0) return null
+
+    const colors = [
+      "#10b981", // emerald-500
+      "#0d9488", // teal-600
+      "#0ea5e9", // sky-500
+      "#8b5cf6", // violet-500
+      "#ec4899", // pink-500
+      "#f59e0b", // amber-500
+      "#ef4444", // red-500
+      "#84cc16", // lime-500
+      "#6366f1", // indigo-500
+      "#14b8a6"  // teal-500
+    ]
+
+    const size = 384 // w-96 in pixels
+    const centerX = size / 2
+    const centerY = size / 2
+    const outerRadius = size / 2 - 10
+    const innerRadius = outerRadius * 0.4
+
+    const points = generateStarPoints(centerX, centerY, names.length, outerRadius, innerRadius)
+
+    return (
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="drop-shadow-lg">
+        {names.map((name, index) => {
+          const color = colors[index % colors.length]
+          const isHighlighted = index === currentHighlightIndex
+          const isSelected = name === selectedName
+
+          // Calculate points for this branch polygon
+          const branchPoints = [
+            points[index * 2], // Outer point (tip)
+            points[(index * 2 + 1) % points.length], // Inner point right
+            { x: centerX, y: centerY }, // Center
+            points[(index * 2 - 1 + points.length) % points.length], // Inner point left
+          ]
+
+          const pathD = `M ${branchPoints.map(p => `${p.x},${p.y}`).join(' L ')} Z`
+
+          // Calculate angle for text positioning
+          const angle = (index * 360) / names.length
+          const textRadius = outerRadius * 0.6
+          const textAngle = (angle - 90) * (Math.PI / 180)
+          const textX = centerX + Math.cos(textAngle) * textRadius
+          const textY = centerY + Math.sin(textAngle) * textRadius
+
+          return (
+            <g key={name}>
+              {/* Branch */}
+              <path
+                d={pathD}
+                fill={color}
+                stroke={isHighlighted ? "#10b981" : "white"}
+                strokeWidth={isHighlighted ? 4 : 2}
+                className={cn(
+                  "transition-all",
+                  isSelected && "animate-pulse"
+                )}
+                style={isHighlighted ? { filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.6))' } : undefined}
+              />
+
+              {/* Name */}
+              <text
+                x={textX}
+                y={textY}
+                fill="white"
+                fontSize={names.length > 8 ? "14" : names.length > 5 ? "16" : "18"}
+                fontWeight="bold"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                transform={`rotate(${angle}, ${textX}, ${textY})`}
+                style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.7)', pointerEvents: 'none' }}
+              >
+                {name}
+              </text>
+            </g>
+          )
+        })}
+
+        {/* Center circle */}
+        <circle cx={centerX} cy={centerY} r={10} fill="#1f2937" stroke="white" strokeWidth={2} />
+      </svg>
+    )
+  }
+
+  // Animate star by randomly highlighting branches
+  const animateStar = () => {
+    if (names.length < 2 || starAnimating) return
+
+    setStarAnimating(true)
+    setSelectedName(null)
+    setCurrentHighlightIndex(null)
+
+    const randomFinalIndex = Math.floor(Math.random() * names.length)
+    let jumpCount = 0
+    const totalJumps = 33 // ~4 seconds at 120ms per jump
+
+    starIntervalRef.current = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * names.length)
+      setCurrentHighlightIndex(randomIndex)
+      jumpCount++
+
+      if (jumpCount >= totalJumps) {
+        if (starIntervalRef.current) {
+          clearInterval(starIntervalRef.current)
+          starIntervalRef.current = null
+        }
+        setCurrentHighlightIndex(randomFinalIndex)
+
+        setTimeout(() => {
+          setSelectedName(names[randomFinalIndex])
+          setCurrentHighlightIndex(null)
+          setStarAnimating(false)
+          setButtonMode("remove")
+        }, 200)
+      }
+    }, 120)
   }
 
   // Generate grid cells with names and empty cells
@@ -532,13 +693,16 @@ export default function NameWheel() {
         </div>
 
         <div className="flex flex-col items-center">
-          <Tabs value={displayMode} onValueChange={(v) => setDisplayMode(v as "wheel" | "grid")} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="wheel" disabled={spinning || gridAnimating}>
+          <Tabs value={displayMode} onValueChange={(v) => setDisplayMode(v as "wheel" | "grid" | "star")} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsTrigger value="wheel" disabled={spinning || gridAnimating || starAnimating}>
                 Roue
               </TabsTrigger>
-              <TabsTrigger value="grid" disabled={spinning || gridAnimating}>
+              <TabsTrigger value="grid" disabled={spinning || gridAnimating || starAnimating}>
                 Grille
+              </TabsTrigger>
+              <TabsTrigger value="star" disabled={spinning || gridAnimating || starAnimating}>
+                Étoile
               </TabsTrigger>
             </TabsList>
 
@@ -597,25 +761,31 @@ export default function NameWheel() {
                 {generateGridCells()}
               </div>
             </TabsContent>
+
+            <TabsContent value="star" className="mt-0">
+              <div className="w-96 h-96 sm:w-96 sm:h-96 mx-auto flex items-center justify-center">
+                {generateStarSegments()}
+              </div>
+            </TabsContent>
           </Tabs>
 
           <Button
             onClick={handleButtonClick}
-            disabled={names.length < 2 || spinning || gridAnimating}
+            disabled={names.length < 2 || spinning || gridAnimating || starAnimating}
             className={`mt-8 px-8 ${
               buttonMode === "spin" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"
             }`}
             size="lg"
           >
-            {(spinning || gridAnimating) ? (
+            {(spinning || gridAnimating || starAnimating) ? (
               <>
                 <RotateCw className="h-5 w-5 mr-2 animate-spin" />
-                {displayMode === "wheel" ? "Rotation en cours..." : "Animation en cours..."}
+                {displayMode === "wheel" ? "Rotation en cours..." : displayMode === "grid" ? "Animation en cours..." : "Animation en cours..."}
               </>
             ) : buttonMode === "spin" ? (
               <>
                 <RotateCw className="h-5 w-5 mr-2" />
-                {displayMode === "wheel" ? "Tourner la Roue" : "Animer la Grille"}
+                {displayMode === "wheel" ? "Tourner la Roue" : displayMode === "grid" ? "Animer la Grille" : "Animer l'Étoile"}
               </>
             ) : (
               <>
@@ -629,7 +799,11 @@ export default function NameWheel() {
             {names.length < 2 && buttonMode === "spin"
               ? "Ajoutez au moins 2 noms pour commencer"
               : buttonMode === "spin"
-                ? `Cliquez pour ${displayMode === "wheel" ? "faire tourner la roue" : "animer la grille"} et sélectionner un nom aléatoirement`
+                ? `Cliquez pour ${
+                    displayMode === "wheel" ? "faire tourner la roue" :
+                    displayMode === "grid" ? "animer la grille" :
+                    "animer l'étoile"
+                  } et sélectionner un nom aléatoirement`
                 : "Cliquez pour supprimer le nom sélectionné et tourner à nouveau"}
           </p>
 
