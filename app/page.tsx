@@ -16,7 +16,7 @@ const customStyles = `
   .clip-triangle {
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
   }
-  
+
   .wheel-segment-container {
     position: absolute;
     inset: 0;
@@ -24,7 +24,7 @@ const customStyles = `
     border-radius: 50%;
     overflow: hidden;
   }
-  
+
   .wheel-name {
     position: absolute;
     left: 0;
@@ -40,7 +40,7 @@ const customStyles = `
     pointer-events: none;
     transform-origin: center;
   }
-  
+
   .name-text {
     position: absolute;
     left: 50%;
@@ -48,7 +48,7 @@ const customStyles = `
     text-align: center;
     transform-origin: left center;
   }
-  
+
   .selector-segment {
     position: absolute;
     width: 100%;
@@ -60,6 +60,21 @@ const customStyles = `
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     pointer-events: none;
     z-index: 10;
+  }
+
+  @keyframes star-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+  }
+
+  .star-branch-pulse {
+    animation: star-pulse 1s ease-in-out infinite;
   }
 `;
 
@@ -359,7 +374,7 @@ export default function NameWheel() {
           const textY = centerY + Math.sin(textAngle) * textRadius
 
           return (
-            <g key={name} style={{ transformOrigin: `${centerX}px ${centerY}px` }}>
+            <g key={name}>
               {/* Branch */}
               <path
                 d={pathD}
@@ -368,11 +383,11 @@ export default function NameWheel() {
                 strokeWidth={isHighlighted ? 4 : 2}
                 className={cn(
                   "transition-all",
-                  isSelected && "animate-pulse"
+                  isSelected && "star-branch-pulse"
                 )}
                 style={{
                   ...(isHighlighted ? { filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.6))' } : {}),
-                  transformOrigin: `${centerX}px ${centerY}px`,
+                  transformOrigin: 'center',
                   transformBox: 'fill-box'
                 }}
               />
