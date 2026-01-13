@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { cn } from "@/lib/utils"
 
 // Add custom CSS for the triangle pointer and wheel
 const customStyles = `
@@ -83,11 +85,19 @@ export default function NameWheel() {
   const [timerActive, setTimerActive] = useState(false)
   const [timeLeft, setTimeLeft] = useState(120) // 2 minutes en secondes
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  // États pour le mode grille
+  const [displayMode, setDisplayMode] = useState<"wheel" | "grid">(() => {
+    const modeParam = searchParams.get("mode")
+    return modeParam === "grid" ? "grid" : "wheel"
+  })
+  const [gridAnimating, setGridAnimating] = useState(false)
+  const [currentHighlightIndex, setCurrentHighlightIndex] = useState<number | null>(null)
+  const gridIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Track if we're updating from URL to prevent loops
   const isUpdatingFromUrl = useRef(false)
 
-  // Update URL when names change, but only if not updating from URL
+  // Update URL when names or displayMode change, but only if not updating from URL
   useEffect(() => {
     if (isUpdatingFromUrl.current) {
       isUpdatingFromUrl.current = false
@@ -98,23 +108,29 @@ export default function NameWheel() {
     if (names.length > 0) {
       params.set("names", names.join(","))
     }
+    if (displayMode !== "wheel") {
+      params.set("mode", displayMode)
+    }
 
     // Create new URL with updated params
-    const newUrl = `${window.location.pathname}${names.length > 0 ? `?${params.toString()}` : ""}`
+    const newUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}`
 
     // Update URL without full page reload
     window.history.pushState({}, "", newUrl)
-  }, [names])
+  }, [names, displayMode])
 
   // Sync state with URL on navigation, but only when searchParams actually change
   useEffect(() => {
     const newNames = getNamesFromUrl()
-    // Only update if the names are different to prevent loops
-    if (JSON.stringify(newNames) !== JSON.stringify(names)) {
+    const newMode = searchParams.get("mode") === "grid" ? "grid" : "wheel"
+
+    // Only update if the names or mode are different to prevent loops
+    if (JSON.stringify(newNames) !== JSON.stringify(names) || newMode !== displayMode) {
       isUpdatingFromUrl.current = true
       setNames(newNames)
+      setDisplayMode(newMode)
     }
-  }, [searchParams, names])
+  }, [searchParams, names, displayMode])
 
   // Fonction pour démarrer le timer
   const startTimer = () => {
@@ -134,11 +150,14 @@ export default function NameWheel() {
     }, 1000)
   }
 
-  // Nettoyer le timer quand le composant est démonté
+  // Nettoyer le timer et l'intervalle de la grille quand le composant est démonté
   useEffect(() => {
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current)
+      }
+      if (gridIntervalRef.current) {
+        clearInterval(gridIntervalRef.current)
       }
     }
   }, [])
@@ -185,7 +204,11 @@ export default function NameWheel() {
   // Handle button click based on current mode
   const handleButtonClick = () => {
     if (buttonMode === "spin") {
-      spinWheel()
+      if (displayMode === "wheel") {
+        spinWheel()
+      } else {
+        animateGrid()
+      }
     } else {
       // Remove the selected name
       if (selectedName) {
@@ -239,6 +262,102 @@ export default function NameWheel() {
         }, 50)
       }, 100)
     }, 4000)
+  }
+
+  // Calculate grid size for square grid
+  const calculateGridSize = (nameCount: number) => {
+    const size = Math.ceil(Math.sqrt(nameCount))
+    return { rows: size, cols: size }
+  }
+
+  // Generate grid cells with names and empty cells
+  const generateGridCells = () => {
+    if (names.length === 0) return null
+
+    const { rows, cols } = calculateGridSize(names.length)
+    const totalCells = rows * cols
+    const colors = [
+      "#10b981", // emerald-500
+      "#0d9488", // teal-600
+      "#0ea5e9", // sky-500
+      "#8b5cf6", // violet-500
+      "#ec4899", // pink-500
+      "#f59e0b", // amber-500
+      "#ef4444", // red-500
+      "#84cc16", // lime-500
+      "#6366f1", // indigo-500
+      "#14b8a6"  // teal-500
+    ]
+
+    // Create array of cells (names + empty)
+    const cells = Array.from({ length: totalCells }, (_, i) => {
+      const name = names[i] || null
+      const color = name ? colors[i % colors.length] : null
+      const isHighlighted = i === currentHighlightIndex
+      const isSelected = name === selectedName
+
+      return { name, color, isHighlighted, isSelected, index: i }
+    })
+
+    return (
+      <div className="grid gap-2 w-full h-full" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+        {cells.map(cell => (
+          <div
+            key={cell.index}
+            className={cn(
+              "aspect-square flex items-center justify-center rounded-lg font-semibold transition-all",
+              cell.name ? "text-white shadow-md" : "bg-muted/30",
+              cell.isHighlighted && "ring-4 ring-emerald-500 shadow-lg shadow-emerald-500/50",
+              cell.isSelected && "ring-4 ring-emerald-600 animate-pulse"
+            )}
+            style={cell.color ? { backgroundColor: cell.color } : undefined}
+          >
+            {cell.name && (
+              <span className={cn(
+                "text-center px-2",
+                rows <= 2 ? "text-lg" : rows === 3 ? "text-base" : "text-sm"
+              )}>
+                {cell.name}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Animate grid by randomly highlighting cells
+  const animateGrid = () => {
+    if (names.length < 2 || gridAnimating) return
+
+    setGridAnimating(true)
+    setSelectedName(null)
+    setCurrentHighlightIndex(null)
+
+    const randomFinalIndex = Math.floor(Math.random() * names.length)
+    let jumpCount = 0
+    const totalJumps = 33 // ~4 seconds at 120ms per jump
+
+    gridIntervalRef.current = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * names.length)
+      setCurrentHighlightIndex(randomIndex)
+      jumpCount++
+
+      if (jumpCount >= totalJumps) {
+        if (gridIntervalRef.current) {
+          clearInterval(gridIntervalRef.current)
+          gridIntervalRef.current = null
+        }
+        setCurrentHighlightIndex(randomFinalIndex)
+
+        setTimeout(() => {
+          setSelectedName(names[randomFinalIndex])
+          setCurrentHighlightIndex(null)
+          setGridAnimating(false)
+          setButtonMode("remove")
+        }, 200)
+      }
+    }, 120)
   }
 
   // Generate wheel with conic gradient and properly positioned text
@@ -413,71 +532,90 @@ export default function NameWheel() {
         </div>
 
         <div className="flex flex-col items-center">
-          <div className="relative w-96 h-96 sm:w-96 sm:h-96 mx-auto">
-            {/* Fixed wheel container */}
-            <div
-              className="absolute inset-0 rounded-full border-4 border-gray-300 overflow-hidden shadow-lg"
-              style={{
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                margin: 'auto'
-              }}
-            >
-              {generateWheelSegments()}
-            </div>
-            
-            {/* Rotating selector segment */}
-            <div 
-              style={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                borderRadius: '50%',
-                transform: `rotate(${rotationAngle}deg)`,
-                transition: isTransitioning ? "transform 4s cubic-bezier(0.2, 0.8, 0.2, 1)" : "none",
-                pointerEvents: 'none',
-                zIndex: 5,
-              }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  backgroundClip: 'content-box',
-                  border: '4px solid red',
-                  borderRadius: '50%',
-                  clipPath: `polygon(50% 50%, ${50 - (360/names.length)/2}% 0%, ${50 + (360/names.length)/2}% 0%)`,
-                  backgroundColor: 'transparent',
-                }}
-              />
-            </div>
+          <Tabs value={displayMode} onValueChange={(v) => setDisplayMode(v as "wheel" | "grid")} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="wheel" disabled={spinning || gridAnimating}>
+                Roue
+              </TabsTrigger>
+              <TabsTrigger value="grid" disabled={spinning || gridAnimating}>
+                Grille
+              </TabsTrigger>
+            </TabsList>
 
-            {/* Center point */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-gray-800 rounded-full z-10 shadow-md"></div>
-          </div>
+            <TabsContent value="wheel" className="mt-0">
+              <div className="relative w-96 h-96 sm:w-96 sm:h-96 mx-auto">
+                {/* Fixed wheel container */}
+                <div
+                  className="absolute inset-0 rounded-full border-4 border-gray-300 overflow-hidden shadow-lg"
+                  style={{
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    margin: 'auto'
+                  }}
+                >
+                  {generateWheelSegments()}
+                </div>
+
+                {/* Rotating selector segment */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    transform: `rotate(${rotationAngle}deg)`,
+                    transition: isTransitioning ? "transform 4s cubic-bezier(0.2, 0.8, 0.2, 1)" : "none",
+                    pointerEvents: 'none',
+                    zIndex: 5,
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      backgroundClip: 'content-box',
+                      border: '4px solid red',
+                      borderRadius: '50%',
+                      clipPath: `polygon(50% 50%, ${50 - (360/names.length)/2}% 0%, ${50 + (360/names.length)/2}% 0%)`,
+                      backgroundColor: 'transparent',
+                    }}
+                  />
+                </div>
+
+                {/* Center point */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-gray-800 rounded-full z-10 shadow-md"></div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="grid" className="mt-0">
+              <div className="w-96 h-96 sm:w-96 sm:h-96 mx-auto flex items-center justify-center p-4">
+                {generateGridCells()}
+              </div>
+            </TabsContent>
+          </Tabs>
 
           <Button
             onClick={handleButtonClick}
-            disabled={names.length < 2 || spinning || (buttonMode === "spin" && names.length < 2)}
+            disabled={names.length < 2 || spinning || gridAnimating}
             className={`mt-8 px-8 ${
               buttonMode === "spin" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"
             }`}
             size="lg"
           >
-            {spinning ? (
+            {(spinning || gridAnimating) ? (
               <>
                 <RotateCw className="h-5 w-5 mr-2 animate-spin" />
-                Rotation en cours...
+                {displayMode === "wheel" ? "Rotation en cours..." : "Animation en cours..."}
               </>
             ) : buttonMode === "spin" ? (
               <>
                 <RotateCw className="h-5 w-5 mr-2" />
-                Tourner la Roue
+                {displayMode === "wheel" ? "Tourner la Roue" : "Animer la Grille"}
               </>
             ) : (
               <>
@@ -487,13 +625,11 @@ export default function NameWheel() {
             )}
           </Button>
 
-          
-
           <p className="mt-4 text-center text-sm text-muted-foreground">
             {names.length < 2 && buttonMode === "spin"
-              ? "Ajoutez au moins 2 noms pour faire tourner la roue"
+              ? "Ajoutez au moins 2 noms pour commencer"
               : buttonMode === "spin"
-                ? "Cliquez pour faire tourner la roue et sélectionner un nom aléatoirement"
+                ? `Cliquez pour ${displayMode === "wheel" ? "faire tourner la roue" : "animer la grille"} et sélectionner un nom aléatoirement`
                 : "Cliquez pour supprimer le nom sélectionné et tourner à nouveau"}
           </p>
 
