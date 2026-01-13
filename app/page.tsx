@@ -353,13 +353,13 @@ export default function NameWheel() {
 
           // Calculate angle for text positioning
           const angle = (index * 360) / names.length
-          const textRadius = outerRadius * 0.6
+          const textRadius = outerRadius * 0.45 // Plus proche du centre (45% au lieu de 60%)
           const textAngle = (angle - 90) * (Math.PI / 180)
           const textX = centerX + Math.cos(textAngle) * textRadius
           const textY = centerY + Math.sin(textAngle) * textRadius
 
           return (
-            <g key={name}>
+            <g key={name} style={{ transformOrigin: `${centerX}px ${centerY}px` }}>
               {/* Branch */}
               <path
                 d={pathD}
@@ -370,10 +370,14 @@ export default function NameWheel() {
                   "transition-all",
                   isSelected && "animate-pulse"
                 )}
-                style={isHighlighted ? { filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.6))' } : undefined}
+                style={{
+                  ...(isHighlighted ? { filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.6))' } : {}),
+                  transformOrigin: `${centerX}px ${centerY}px`,
+                  transformBox: 'fill-box'
+                }}
               />
 
-              {/* Name */}
+              {/* Name - kept horizontal relative to screen */}
               <text
                 x={textX}
                 y={textY}
@@ -382,7 +386,6 @@ export default function NameWheel() {
                 fontWeight="bold"
                 textAnchor="middle"
                 dominantBaseline="middle"
-                transform={`rotate(${angle}, ${textX}, ${textY})`}
                 style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.7)', pointerEvents: 'none' }}
               >
                 {name}
