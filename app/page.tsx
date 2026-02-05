@@ -245,59 +245,60 @@ export default function NameWheel() {
   // Remove selected name and immediately start animation
   const handleRemoveAndSpin = () => {
     if (selectedName) {
+      // Calculer les noms restants AVANT la suppression pour éviter le stale closure
+      const newNames = names.filter((name) => name !== selectedName)
       removeName(selectedName)
       // Wait a tick for state to update before spinning again
       setTimeout(() => {
         if (displayMode === "wheel") {
-          spinWheel()
+          spinWheel(newNames)
         } else if (displayMode === "grid") {
-          animateGrid()
+          animateGrid(newNames)
         } else {
-          animateStar()
+          animateStar(newNames)
         }
       }, 50)
     }
   }
 
   // Spin the wheel
-  const spinWheel = () => {
-    if (names.length < 2 || spinning) return
+  const spinWheel = (overrideNames?: string[]) => {
+    const currentNames = overrideNames ?? names
+    if (currentNames.length < 2 || spinning) return
 
     setSpinning(true)
     setSelectedName(null)
     setIsTransitioning(true)
 
     // Calculate segment angle
-    const segmentAngle = 360 / names.length
-    
+    const segmentAngle = 360 / currentNames.length
+
     // Pick a random name (segment) to land on
-    const randomSegment = Math.floor(Math.random() * names.length)
-    
+    const randomSegment = Math.floor(Math.random() * currentNames.length)
+
     // Calculate the target angle for the selected segment
     // Le segment 0 est en haut (0 degrés), et on tourne dans le sens horaire
     const targetAngle = randomSegment * segmentAngle
-    
+
     // Nombre de tours complets entre 5 et 8 pour plus de dynamisme
     const fullRotations = 5 + Math.floor(Math.random() * 3)
-    
+
     // La nouvelle rotation est calculée à partir de zéro
     const totalRotation = (fullRotations * 360) + targetAngle + segmentAngle / 2
-    
-    console.log("New rotation angle:", totalRotation)
-    
+
     setRotationAngle(totalRotation)
 
     // Calculate which name is selected after spinning
     setTimeout(() => {
-      setSelectedName(names[randomSegment])
+      setSelectedName(currentNames[randomSegment])
       setSpinning(false)
       setButtonMode("remove")
-      
+
       // Réinitialiser l'angle après l'animation en désactivant la transition
       setTimeout(() => {
         setIsTransitioning(false)
         setRotationAngle(targetAngle + segmentAngle / 2)
-        
+
         // Réactiver la transition après la réinitialisation
         setTimeout(() => {
           setIsTransitioning(true)
@@ -434,19 +435,20 @@ export default function NameWheel() {
   }
 
   // Animate star by randomly highlighting branches
-  const animateStar = () => {
-    if (names.length < 2 || starAnimating) return
+  const animateStar = (overrideNames?: string[]) => {
+    const currentNames = overrideNames ?? names
+    if (currentNames.length < 2 || starAnimating) return
 
     setStarAnimating(true)
     setSelectedName(null)
     setCurrentHighlightIndex(null)
 
-    const randomFinalIndex = Math.floor(Math.random() * names.length)
+    const randomFinalIndex = Math.floor(Math.random() * currentNames.length)
     let jumpCount = 0
     const totalJumps = 33 // ~4 seconds at 120ms per jump
 
     starIntervalRef.current = setInterval(() => {
-      const randomIndex = Math.floor(Math.random() * names.length)
+      const randomIndex = Math.floor(Math.random() * currentNames.length)
       setCurrentHighlightIndex(randomIndex)
       jumpCount++
 
@@ -458,7 +460,7 @@ export default function NameWheel() {
         setCurrentHighlightIndex(randomFinalIndex)
 
         setTimeout(() => {
-          setSelectedName(names[randomFinalIndex])
+          setSelectedName(currentNames[randomFinalIndex])
           setCurrentHighlightIndex(null)
           setStarAnimating(false)
           setButtonMode("remove")
@@ -524,19 +526,20 @@ export default function NameWheel() {
   }
 
   // Animate grid by randomly highlighting cells
-  const animateGrid = () => {
-    if (names.length < 2 || gridAnimating) return
+  const animateGrid = (overrideNames?: string[]) => {
+    const currentNames = overrideNames ?? names
+    if (currentNames.length < 2 || gridAnimating) return
 
     setGridAnimating(true)
     setSelectedName(null)
     setCurrentHighlightIndex(null)
 
-    const randomFinalIndex = Math.floor(Math.random() * names.length)
+    const randomFinalIndex = Math.floor(Math.random() * currentNames.length)
     let jumpCount = 0
     const totalJumps = 33 // ~4 seconds at 120ms per jump
 
     gridIntervalRef.current = setInterval(() => {
-      const randomIndex = Math.floor(Math.random() * names.length)
+      const randomIndex = Math.floor(Math.random() * currentNames.length)
       setCurrentHighlightIndex(randomIndex)
       jumpCount++
 
@@ -548,7 +551,7 @@ export default function NameWheel() {
         setCurrentHighlightIndex(randomFinalIndex)
 
         setTimeout(() => {
-          setSelectedName(names[randomFinalIndex])
+          setSelectedName(currentNames[randomFinalIndex])
           setCurrentHighlightIndex(null)
           setGridAnimating(false)
           setButtonMode("remove")
