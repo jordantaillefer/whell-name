@@ -3,13 +3,14 @@
 import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
-import { Trash2, Plus, RotateCw, Clock } from "lucide-react"
+import { Trash2, Plus, RotateCw, Clock, Sparkles, Stars } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
+import { getDailyHoroscope } from "@/lib/nameFacts/horoscopeTemplates"
 
 // Add custom CSS for the triangle pointer and wheel
 const customStyles = `
@@ -110,6 +111,10 @@ export default function NameWheel() {
   const [currentHighlightIndex, setCurrentHighlightIndex] = useState<number | null>(null)
   const gridIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const starIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  // États pour l'anecdote "Le saviez-vous ?"
+  const [nameFact, setNameFact] = useState<string | null>(null)
+  const [factTotal, setFactTotal] = useState<number>(0)
+  const [factLoading, setFactLoading] = useState(false)
 
   // Track if we're updating from URL to prevent loops
   const isUpdatingFromUrl = useRef(false)
@@ -168,6 +173,42 @@ export default function NameWheel() {
       })
     }, 1000)
   }
+
+  // Charger une anecdote quand un prénom est sélectionné
+  useEffect(() => {
+    if (!selectedName) {
+      setNameFact(null)
+      setFactTotal(0)
+      setFactLoading(false)
+      return
+    }
+
+    let cancelled = false
+    setFactLoading(true)
+    setNameFact(null)
+    setFactTotal(0)
+
+    fetch(`/api/name-fact?name=${encodeURIComponent(selectedName)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { fact?: string; totalFacts?: number } | null) => {
+        if (cancelled) return
+        setNameFact(data?.fact || null)
+        setFactTotal(data?.totalFacts ?? 0)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setNameFact(null)
+        setFactTotal(0)
+      })
+      .finally(() => {
+        if (cancelled) return
+        setFactLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedName])
 
   // Nettoyer les timers et intervalles quand le composant est démonté
   useEffect(() => {
@@ -706,12 +747,47 @@ export default function NameWheel() {
           </Card>
 
           {selectedName && (
-            <div className="mt-6 text-center">
+            <div className="mt-6 text-center w-full">
               <h2 className="text-xl font-semibold">Sélectionné:</h2>
               <div className="text-2xl font-bold mt-2 p-4 bg-emerald-100 text-emerald-800 rounded-lg animate-pulse">
                 {selectedName}
               </div>
-              
+
+              {/* Anecdote "Le saviez-vous ?" */}
+              <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-left">
+                <div className="flex items-center gap-2 text-amber-700 font-semibold mb-2">
+                  <Sparkles className="h-4 w-4" />
+                  <span>Le saviez-vous ?</span>
+                </div>
+                {factLoading ? (
+                  <p className="text-sm text-amber-800/70 italic">Recherche d'une anecdote…</p>
+                ) : nameFact ? (
+                  <>
+                    <p className="text-amber-900 italic">« {nameFact} »</p>
+                    {factTotal > 1 && (
+                      <p className="text-xs text-amber-700/70 mt-2">
+                        1 anecdote choisie parmi {factTotal.toLocaleString("fr-FR")} possibles.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-sm text-amber-800/70 italic">
+                    Aucune anecdote disponible pour ce prénom.
+                  </p>
+                )}
+              </div>
+
+              {/* Horoscope du jour */}
+              <div className="mt-4 p-4 bg-violet-50 border border-violet-200 rounded-lg text-left">
+                <div className="flex items-center gap-2 text-violet-700 font-semibold mb-2">
+                  <Stars className="h-4 w-4" />
+                  <span>Horoscope du jour</span>
+                </div>
+                <p className="text-violet-900 italic">
+                  « {getDailyHoroscope(selectedName)} »
+                </p>
+              </div>
+
               {/* Nouveau bouton de timer */}
               {!timerActive ? (
                 <Button
