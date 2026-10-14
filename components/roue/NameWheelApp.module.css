@@ -23,7 +23,8 @@
 }
 .stageSingle { grid-template-columns: minmax(0, 1fr); }
 .drawCol { display: flex; flex-direction: column; align-items: center; gap: 24px; }
-.drawArea { position: relative; display: grid; place-items: center; isolation: isolate; }
+/* Marge haute : le repère (-14px) et la part gagnante qui ressort (+12px) ne doivent pas toucher le sélecteur */
+.drawArea { position: relative; display: grid; place-items: center; isolation: isolate; margin-top: 28px; }
 .glow {
   position: absolute;
   top: 50%;
