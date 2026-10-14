@@ -1,0 +1,142 @@
+.root { width: 100%; }
+.empty {
+  padding: 28px;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--rn-mute);
+  background: color-mix(in srgb, var(--rn-bg) 70%, transparent);
+  backdrop-filter: blur(6px);
+  border: 1px dashed var(--rn-border);
+}
+.emptyTitle { display: block; margin-bottom: 6px; font-size: 20px; font-weight: 700; color: var(--rn-text); }
+.emptyAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 8px 16px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--rn-bg);
+  background: var(--rn-blue);
+  border: 0;
+  cursor: pointer;
+}
+.card {
+  background: var(--rn-bg);
+  border: 1px solid var(--rn-border);
+  box-shadow: 0 24px 40px -22px color-mix(in srgb, var(--win-ink) 55%, transparent);
+  animation: cardIn 0.6s cubic-bezier(.2, 1.3, .4, 1) 0.1s both;
+}
+.top { padding: 22px 28px 20px; background: var(--win); border-top: 4px solid var(--win-ink); }
+.eyebrow {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rn-mute);
+}
+.top .eyebrow { color: var(--win-ink); opacity: 0.85; }
+.name {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 2px 0 0;
+  overflow: hidden;
+  font-size: 46px;
+  line-height: 52px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--win-ink);
+}
+.letter {
+  display: inline-block;
+  animation: rise 0.5s cubic-bezier(.2, 1.2, .4, 1) both;
+  animation-delay: calc(0.15s + var(--i) * 0.04s);
+}
+.timer { display: grid; gap: 10px; padding: 20px 28px; }
+.timerRow { display: flex; align-items: baseline; justify-content: space-between; }
+.clock { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--rn-text); }
+.clock[data-tone="warn"] { color: var(--rn-warning); }
+.clock[data-tone="danger"] { color: var(--rn-error); }
+.bar { height: 6px; overflow: hidden; border-radius: 3px; background: var(--rn-bg-contrast); }
+.barFill {
+  display: block;
+  height: 100%;
+  transform-origin: left;
+  transition: transform 0.3s linear, background-color 0.6s ease;
+}
+.tabs { display: flex; gap: 2px; margin: 0 28px; border-bottom: 1px solid var(--rn-border); }
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: -1px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rn-text-2);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.tab[aria-selected="true"] { color: var(--win-ink); border-bottom-color: var(--win-ink); }
+.panel {
+  margin: 12px 28px 20px;
+  padding: 14px 16px 14px 18px;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--rn-text-2);
+  background: color-mix(in srgb, var(--win) 45%, var(--rn-bg));
+  border-left: 3px solid var(--win-ink);
+}
+.panel p { margin: 0; }
+.panelTitle { display: flex; align-items: center; gap: 6px; margin-bottom: 4px !important; font-weight: 700; color: var(--win-ink); }
+.panelMeta { margin-top: 6px !important; font-size: 12px; color: var(--rn-mute); }
+.skeleton {
+  display: block;
+  height: 12px;
+  margin: 6px 0;
+  background: linear-gradient(90deg, var(--rn-bg-contrast), var(--rn-bg-alt), var(--rn-bg-contrast));
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+.actions { display: flex; flex-wrap: wrap; border-top: 1px solid var(--rn-border); }
+.action {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--rn-blue);
+  overflow-wrap: anywhere;
+  background: var(--rn-bg);
+  border: 0;
+  cursor: pointer;
+}
+.action + .action { border-left: 1px solid var(--rn-border); }
+.action:hover { background: var(--rn-bg-alt); }
+.pause { flex: 0 0 auto; }
+.actionPrimary { color: var(--rn-bg); background: var(--rn-blue); }
+.actionPrimary:hover { background: var(--rn-blue-hover); }
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes rise {
+  from { transform: translateY(110%); }
+  to { transform: none; }
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .letter, .skeleton { animation: none; }
+}
