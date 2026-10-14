@@ -1,0 +1,21 @@
+.star {
+  width: min(420px, 86vw);
+  aspect-ratio: 1;
+  overflow: visible;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 90, 0.14));
+}
+.branch { transform-box: fill-box; transform-origin: center; transition: opacity 0.4s ease; }
+.branch path { transition: stroke 0.12s ease; }
+.won .branch:not(.winner) { opacity: 0.45; }
+.winner { animation: pulse 1s ease-in-out infinite; }
+.label { font-family: inherit; pointer-events: none; }
+.hub { fill: var(--rn-blue); stroke: var(--rn-wheel-ring); stroke-width: 2; }
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .winner { animation: none; }
+}
