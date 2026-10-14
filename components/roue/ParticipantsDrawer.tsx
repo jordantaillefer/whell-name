@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { useState, type FormEvent, type RefObject } from "react"
 import * as Dialog from "@radix-ui/react-dialog"
 import { ArrowLeftIcon, CounterClockwiseClockIcon, Cross2Icon, LockClosedIcon, PlusIcon } from "@radix-ui/react-icons"
 import {
@@ -31,9 +31,22 @@ type Props = {
   onRemove: (name: string) => void
   onClear: () => void
   onResumeLastList: () => void
+  /** Élément qui reprend le focus à la fermeture (le bouton qui a ouvert le panneau). */
+  returnFocusRef?: RefObject<HTMLElement | null>
 }
 
-export function ParticipantsDrawer({ open, onOpenChange, names, colors, history, onAdd, onRemove, onClear, onResumeLastList }: Props) {
+export function ParticipantsDrawer({
+  open,
+  onOpenChange,
+  names,
+  colors,
+  history,
+  onAdd,
+  onRemove,
+  onClear,
+  onResumeLastList,
+  returnFocusRef,
+}: Props) {
   const [input, setInput] = useState("")
   const [message, setMessage] = useState<string | null>(null)
   const [recent, setRecent] = useState<Set<string>>(new Set())
@@ -57,7 +70,16 @@ export function ParticipantsDrawer({ open, onOpenChange, names, colors, history,
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className={styles.overlay} />
-        <Dialog.Content className={styles.panel} aria-describedby={undefined}>
+        <Dialog.Content
+          className={styles.panel}
+          aria-describedby={undefined}
+          onCloseAutoFocus={(event) => {
+            const target = returnFocusRef?.current
+            if (!target) return
+            event.preventDefault()
+            target.focus()
+          }}
+        >
           <header className={styles.head}>
             <Dialog.Title className={styles.title}>Participants</Dialog.Title>
             <Dialog.Close className={styles.close}>

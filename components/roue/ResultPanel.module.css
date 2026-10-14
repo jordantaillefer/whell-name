@@ -24,6 +24,8 @@
   cursor: pointer;
 }
 .card {
+  /* Encre d'accent lisible sur le fond de la carte : foncée en clair, pastel en sombre */
+  --accent: var(--win-ink);
   background: var(--rn-bg);
   border: 1px solid var(--rn-border);
   box-shadow: 0 24px 40px -22px color-mix(in srgb, var(--win-ink) 55%, transparent);
@@ -83,7 +85,7 @@
   border-bottom: 2px solid transparent;
   cursor: pointer;
 }
-.tab[aria-selected="true"] { color: var(--win-ink); border-bottom-color: var(--win-ink); }
+.tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 .panel {
   margin: 12px 28px 20px;
   padding: 14px 16px 14px 18px;
@@ -91,10 +93,10 @@
   line-height: 22px;
   color: var(--rn-text-2);
   background: color-mix(in srgb, var(--win) 45%, var(--rn-bg));
-  border-left: 3px solid var(--win-ink);
+  border-left: 3px solid var(--accent);
 }
 .panel p { margin: 0; }
-.panelTitle { display: flex; align-items: center; gap: 6px; margin-bottom: 4px !important; font-weight: 700; color: var(--win-ink); }
+.panelTitle { display: flex; align-items: center; gap: 6px; margin-bottom: 4px !important; font-weight: 700; color: var(--accent); }
 .panelMeta { margin-top: 6px !important; font-size: 12px; color: var(--rn-mute); }
 .skeleton {
   display: block;
@@ -126,6 +128,9 @@
 .pause { flex: 0 0 auto; }
 .actionPrimary { color: var(--rn-bg); background: var(--rn-blue); }
 .actionPrimary:hover { background: var(--rn-blue-hover); }
+
+:global(.dark) .card { --accent: var(--win); }
+:global(.dark) .panel { background: color-mix(in srgb, var(--win) 10%, var(--rn-bg)); }
 
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(16px) scale(0.98); }

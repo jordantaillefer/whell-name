@@ -23,7 +23,7 @@ type Props = {
   onOpenParticipants: () => void
 }
 
-const TONE_COLOR = { ok: "var(--win-ink)", warn: "var(--rn-warning)", danger: "var(--rn-error)" } as const
+const TONE_COLOR = { ok: "var(--accent)", warn: "var(--rn-warning)", danger: "var(--rn-error)" } as const
 
 export function ResultPanel(props: Props) {
   const { selectedName, isFinale } = props
