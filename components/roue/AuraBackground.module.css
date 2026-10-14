@@ -1,0 +1,26 @@
+.aura { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.blob {
+  position: absolute;
+  width: 460px;
+  height: 460px;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: var(--rn-aura-opacity);
+  transition: opacity 1.2s ease;
+  animation: drift 22s ease-in-out infinite alternate;
+}
+.hidden .blob { opacity: 0; }
+.b1 { background: #e3e3fd; left: -120px; top: -140px; }
+.b2 { background: #c3fad5; right: -80px; bottom: -200px; animation-duration: 26s; animation-delay: -6s; }
+.b3 { background: #fee7fc; right: 20%; top: -220px; animation-duration: 30s; animation-delay: -12s; }
+.b4 { background: #fef7da; left: 15%; bottom: -260px; animation-duration: 24s; animation-delay: -3s; }
+
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(60px, 40px) scale(1.08); }
+  100% { transform: translate(-40px, 70px) scale(0.95); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob { animation: none; }
+}

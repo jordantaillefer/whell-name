@@ -1,0 +1,41 @@
+.wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  font: inherit;
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--rn-bg);
+  background: var(--rn-blue);
+  border: 0;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.button:hover:not(:disabled) { background: var(--rn-blue-hover); }
+.button:disabled { color: var(--rn-mute); background: var(--rn-bg-contrast); cursor: not-allowed; }
+.button svg { width: 18px; height: 18px; }
+.busyIcon { animation: spin 1s linear infinite; }
+.pulse { animation: pulse 1.6s ease-out infinite; }
+.hint { margin: 0; font-size: 12px; color: var(--rn-mute); text-align: center; }
+.hint kbd {
+  padding: 1px 6px;
+  font-family: inherit;
+  font-size: 11px;
+  background: var(--rn-bg);
+  border: 1px solid var(--rn-border);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--rn-blue) 45%, transparent); }
+  100% { box-shadow: 0 0 0 18px transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .busyIcon, .pulse { animation: none; }
+}

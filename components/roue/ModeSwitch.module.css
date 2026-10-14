@@ -1,0 +1,23 @@
+.switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: color-mix(in srgb, var(--rn-bg) 90%, transparent);
+  border: 1px solid var(--rn-border);
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--rn-text-2);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.option:hover:not(:disabled):not(.active) { background: var(--rn-bg-alt); }
+.option:disabled { cursor: not-allowed; opacity: 0.6; }
+.active { background: var(--rn-blue); color: var(--rn-bg); }
