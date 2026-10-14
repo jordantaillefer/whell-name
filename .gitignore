@@ -27,3 +27,7 @@ yarn-error.log*
 .idea
 *.tsbuildinfo
 next-env.d.ts
+
+# superpowers brainstorm
+.superpowers/
+.playwright-mcp/
