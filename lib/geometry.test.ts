@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { labelFontSize, polar, starPoints, wedgePath } from "./geometry"
+import { LABEL_SPAN, labelFontSize, labelMaxChars, labelTextLength, polar, starPoints, wedgePath } from "./geometry"
 
 describe("polar", () => {
   it("convertit un angle en coordonnées", () => {
@@ -35,5 +35,23 @@ describe("labelFontSize", () => {
     expect(labelFontSize(8)).toBe(18)
     expect(labelFontSize(12)).toBe(15)
     expect(labelFontSize(20)).toBe(13)
+  })
+})
+
+describe("labelMaxChars", () => {
+  it("limite le nombre de caractères à ce qui tient entre le moyeu et le bord", () => {
+    expect(labelMaxChars(18)).toBe(11)
+    expect(labelMaxChars(15)).toBe(14)
+    expect(labelMaxChars(13)).toBe(16)
+  })
+})
+
+describe("labelTextLength", () => {
+  it("ne contraint pas un nom court", () => {
+    expect(labelTextLength("Bob", 18)).toBeUndefined()
+  })
+
+  it("comprime un libellé trop large pour la place disponible", () => {
+    expect(labelTextLength("MWMWMWMWMWM", 18)).toBe(LABEL_SPAN)
   })
 })

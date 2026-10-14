@@ -11,6 +11,7 @@
   animation: cardIn 0.6s cubic-bezier(.2, 1.3, .4, 1) both;
 }
 .eyebrow { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rn-mute); }
+.title:focus { outline: none; }
 .title { margin: -10px 0 0; font-size: 28px; line-height: 36px; font-weight: 700; color: var(--rn-text); }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0; border: 1px solid var(--rn-border); }
 .stat { display: flex; flex-direction: column-reverse; padding: 10px 14px; }

@@ -13,10 +13,12 @@ type Props = {
   names: string[]
   colors: Swatch[]
   onOpenParticipants: () => void
+  /** Désactive le bouton Participants (tirage en cours). */
+  participantsDisabled?: boolean
   markRef?: Ref<SVGSVGElement>
 }
 
-export function AppHeader({ names, colors, onOpenParticipants, markRef }: Props) {
+export function AppHeader({ names, colors, onOpenParticipants, participantsDisabled, markRef }: Props) {
   const shown = names.slice(0, 6)
   const extra = names.length - shown.length
 
@@ -30,12 +32,21 @@ export function AppHeader({ names, colors, onOpenParticipants, markRef }: Props)
         </div>
       </div>
       <nav className={styles.tools} aria-label="Outils">
-        <button type="button" className={styles.tool} onClick={onOpenParticipants} aria-haspopup="dialog">
+        <button
+          type="button"
+          className={styles.tool}
+          onClick={onOpenParticipants}
+          aria-haspopup="dialog"
+          disabled={participantsDisabled}
+          title={participantsDisabled ? "Disponible à la fin du tirage" : undefined}
+        >
           <PersonIcon aria-hidden />
           <span className={styles.toolLabel}>Participants</span>
           <span className="sr-only">{`(${names.length})`}</span>
           {names.length === 0 ? (
-            <span className={styles.count} aria-hidden>0</span>
+            <span className={styles.count} aria-hidden>
+              0
+            </span>
           ) : (
             <span className={styles.avatars} aria-hidden>
               {shown.map((name, i) => (

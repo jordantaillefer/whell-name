@@ -72,7 +72,16 @@ export function NameWheelApp() {
   const introActive = intro === "playing" || intro === "revealing"
   const fact = useNameFact(selected)
 
-  useEffect(() => () => stopRainRef.current?.(), [])
+  const finaleTimerRef = useRef<number | null>(null)
+  const resultRootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(
+    () => () => {
+      stopRainRef.current?.()
+      if (finaleTimerRef.current !== null) window.clearTimeout(finaleTimerRef.current)
+    },
+    [],
+  )
 
   const handleLanded = useCallback(
     (index: number, drawn: string[]) => {
@@ -101,6 +110,33 @@ export function NameWheelApp() {
   const selectedSwatch = winnerIndex !== null ? colors[winnerIndex] : null
   const finaleReady = stage === "play" && names.length === 1 && entries.length > 0 && selected === null && !drawing
   const inFinale = stage === "finale-spinning" || stage === "finale"
+  // Pendant un tirage, la liste ne doit pas changer (le nom annoncé serait faux)
+  const locked = drawing || stage === "finale-spinning"
+  const lockedRef = useRef(locked)
+  useEffect(() => {
+    lockedRef.current = locked
+  }, [locked])
+
+  // Filet de sécurité : si la liste change quand même (précédent/suivant du navigateur), on annule le tirage
+  const previousNamesRef = useRef(names)
+  useEffect(() => {
+    if (previousNamesRef.current === names) return
+    previousNamesRef.current = names
+    if (!lockedRef.current) return
+    resetDraw()
+    if (finaleTimerRef.current !== null) window.clearTimeout(finaleTimerRef.current)
+    finaleTimerRef.current = null
+    setSelected(null)
+    setStage("play")
+  }, [names, resetDraw])
+
+  // Quand la carte du nom tiré disparaît avec le bouton qui avait le focus, on garde le focus dans le panneau
+  const keepFocusInResult = useCallback(() => {
+    window.setTimeout(() => {
+      const active = document.activeElement
+      if (!active || active === document.body) resultRootRef.current?.focus()
+    }, 0)
+  }, [])
 
   const launch = useCallback(() => {
     if (names.length < 2 || drawing) return
@@ -113,8 +149,9 @@ export function NameWheelApp() {
     if (!finaleReady) return
     const finalist = names[0]
     setStage("finale-spinning")
-    window.setTimeout(
+    finaleTimerRef.current = window.setTimeout(
       () => {
+        finaleTimerRef.current = null
         setStage("finale")
         setSelected(finalist)
         startTimer()
@@ -136,8 +173,9 @@ export function NameWheelApp() {
       setSelected(null)
       setNames(next)
       if (thenSpin && next.length >= 2) window.setTimeout(() => startDraw(next), 50)
+      keepFocusInResult()
     },
-    [selected, names, record, readTimer, resetTimer, setNames, startDraw],
+    [selected, names, record, readTimer, resetTimer, setNames, startDraw, keepFocusInResult],
   )
 
   const finishRound = useCallback(() => {
@@ -261,7 +299,7 @@ export function NameWheelApp() {
     >
       <AuraBackground visible={intro !== "playing"} />
       <div className={cn(styles.reveal, styles.fromTop)} style={{ "--d": "0.05s" } as CSSProperties}>
-        <AppHeader names={names} colors={colors} onOpenParticipants={openParticipants} />
+        <AppHeader names={names} colors={colors} onOpenParticipants={openParticipants} participantsDisabled={locked} />
       </div>
 
       <main className={cn(styles.stage, stage === "recap" && styles.stageSingle)}>
@@ -344,6 +382,7 @@ export function NameWheelApp() {
                 onRemoveAndSpin={() => removeSelected(true)}
                 onFinish={finishRound}
                 onOpenParticipants={openParticipants}
+                rootRef={resultRootRef}
               />
             </div>
           </>

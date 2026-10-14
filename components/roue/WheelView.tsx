@@ -1,7 +1,7 @@
 "use client"
 
 import type { CSSProperties, Ref } from "react"
-import { labelFontSize, polar, wedgePath } from "@/lib/geometry"
+import { LABEL_RADIUS, labelFontSize, labelMaxChars, labelTextLength, polar, wedgePath } from "@/lib/geometry"
 import { truncateLabel } from "@/lib/names"
 import type { Swatch } from "@/lib/palette"
 import { labelNeedsFlip, segmentAngle, segmentCenter } from "@/lib/spin"
@@ -25,6 +25,7 @@ export function WheelView({ names, colors, rotation, animate, durationMs, spinni
   const count = names.length
   const seg = count > 0 ? segmentAngle(count) : 360
   const fontSize = labelFontSize(count)
+  const maxChars = labelMaxChars(fontSize)
   const wheelStyle: CSSProperties = {
     transform: `rotate(${rotation}deg)`,
     transition: animate ? `transform ${durationMs}ms cubic-bezier(.12,.72,.1,1)` : "none",
@@ -54,6 +55,8 @@ export function WheelView({ names, colors, rotation, animate, durationMs, spinni
           const swatch = colors[i]
           const win = i === winnerIndex
           const offset = win ? polar(12, center) : null
+          const label = truncateLabel(name, maxChars)
+          const textLength = labelTextLength(label, fontSize)
           return (
             <g
               key={name}
@@ -70,7 +73,7 @@ export function WheelView({ names, colors, rotation, animate, durationMs, spinni
                   strokeWidth={3}
                 />
               )}
-              <g transform={`rotate(${center}) translate(${R * 0.64} 0)`}>
+              <g transform={`rotate(${center}) translate(${LABEL_RADIUS} 0)`}>
                 <text
                   className={cn(styles.label, !spinning && labelNeedsFlip(i, count, rotation) && styles.flip)}
                   fill={swatch.ink}
@@ -78,8 +81,10 @@ export function WheelView({ names, colors, rotation, animate, durationMs, spinni
                   fontWeight={win ? 700 : 500}
                   textAnchor="middle"
                   dominantBaseline="central"
+                  textLength={textLength}
+                  lengthAdjust={textLength ? "spacingAndGlyphs" : undefined}
                 >
-                  {truncateLabel(name)}
+                  {label}
                   <title>{name}</title>
                 </text>
               </g>

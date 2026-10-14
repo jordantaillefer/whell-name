@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react"
+import { useEffect, useRef, type CSSProperties } from "react"
 import { ReloadIcon } from "@radix-ui/react-icons"
 import { colorsFor } from "@/lib/palette"
 import { sessionStats, type PassEntry } from "@/lib/sessionLog"
@@ -11,11 +11,17 @@ type Props = { entries: PassEntry[]; onReplay: () => void; onNewList: () => void
 export function RecapView({ entries, onReplay, onNewList }: Props) {
   const colors = colorsFor(entries.map((e) => e.name))
   const stats = sessionStats(entries)
+  const titleRef = useRef<HTMLHeadingElement>(null)
+
+  // Le bouton « Terminer le tour de table » disparaît : on amène le focus sur le récap
+  useEffect(() => {
+    titleRef.current?.focus()
+  }, [])
 
   return (
     <section className={styles.recap} aria-labelledby="recap-title">
       <p className={styles.eyebrow}>Tour de table terminé</p>
-      <h2 id="recap-title" className={styles.title}>
+      <h2 id="recap-title" ref={titleRef} tabIndex={-1} className={styles.title}>
         Tout le monde est passé <span aria-hidden>🎉</span>
       </h2>
       <dl className={styles.stats}>
@@ -36,7 +42,11 @@ export function RecapView({ entries, onReplay, onNewList }: Props) {
         {entries.map((entry, i) => {
           const over = entry.durationMs > SPEAKING_LIMIT_MS
           return (
-            <li key={`${entry.name}-${i}`} className={cn(styles.row, over && styles.over)} style={{ "--i": i } as CSSProperties}>
+            <li
+              key={`${entry.name}-${i}`}
+              className={cn(styles.row, over && styles.over)}
+              style={{ "--i": i } as CSSProperties}
+            >
               <span className={styles.rank}>{i + 1}</span>
               <span
                 className={styles.dot}

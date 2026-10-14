@@ -1,7 +1,16 @@
 "use client"
 
-import { useState, type CSSProperties } from "react"
-import { ArrowRightIcon, CheckIcon, Cross2Icon, InfoCircledIcon, PauseIcon, PlayIcon, PlusIcon, StarIcon } from "@radix-ui/react-icons"
+import { useState, type CSSProperties, type Ref } from "react"
+import {
+  ArrowRightIcon,
+  CheckIcon,
+  Cross2Icon,
+  InfoCircledIcon,
+  PauseIcon,
+  PlayIcon,
+  PlusIcon,
+  StarIcon,
+} from "@radix-ui/react-icons"
 import type { NameFactState } from "@/hooks/useNameFact"
 import type { SpeakingTimer } from "@/hooks/useSpeakingTimer"
 import { getDailyHoroscope } from "@/lib/nameFacts/horoscopeTemplates"
@@ -21,18 +30,24 @@ type Props = {
   onRemoveAndSpin: () => void
   onFinish: () => void
   onOpenParticipants: () => void
+  /** Conteneur stable qui reçoit le focus quand la carte disparaît (retrait du nom). */
+  rootRef?: Ref<HTMLDivElement>
 }
 
 const TONE_COLOR = { ok: "var(--accent)", warn: "var(--rn-warning)", danger: "var(--rn-error)" } as const
 
 export function ResultPanel(props: Props) {
-  const { selectedName, isFinale } = props
+  const { selectedName, isFinale, rootRef } = props
   return (
-    <div className={styles.root}>
+    <div ref={rootRef} className={styles.root} tabIndex={-1} aria-label="Résultat du tirage">
       <p className="sr-only" aria-live="polite">
         {selectedName ? `${isFinale ? "Et pour finir" : "Au tour de"} ${selectedName}` : ""}
       </p>
-      {selectedName ? <SelectedCard key={selectedName} {...props} selectedName={selectedName} /> : <EmptyState {...props} />}
+      {selectedName ? (
+        <SelectedCard key={selectedName} {...props} selectedName={selectedName} />
+      ) : (
+        <EmptyState {...props} />
+      )}
     </div>
   )
 }
@@ -108,7 +123,9 @@ function SelectedCard({
       <div className={styles.timer}>
         <div className={styles.timerRow}>
           <span className={styles.eyebrow}>Temps de parole</span>
-          <span className={styles.clock} data-tone={tone}>{countdown}</span>
+          <span className={styles.clock} data-tone={tone}>
+            {countdown}
+          </span>
         </div>
         <div
           className={styles.bar}
@@ -170,7 +187,9 @@ function SelectedCard({
             <>
               <p>« {fact.fact} »</p>
               {fact.total > 1 && (
-                <p className={styles.panelMeta}>1 anecdote choisie parmi {fact.total.toLocaleString("fr-FR")} possibles.</p>
+                <p className={styles.panelMeta}>
+                  1 anecdote choisie parmi {fact.total.toLocaleString("fr-FR")} possibles.
+                </p>
               )}
             </>
           )
@@ -188,7 +207,11 @@ function SelectedCard({
       </div>
 
       <div className={styles.actions}>
-        <button type="button" className={cn(styles.action, styles.pause)} onClick={timer.running ? timer.pause : timer.resume}>
+        <button
+          type="button"
+          className={cn(styles.action, styles.pause)}
+          onClick={timer.running ? timer.pause : timer.resume}
+        >
           {timer.running ? <PauseIcon aria-hidden /> : <PlayIcon aria-hidden />}
           {timer.running ? "Pause" : "Reprendre"}
         </button>

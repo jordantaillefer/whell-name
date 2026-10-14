@@ -33,3 +33,26 @@ export function labelFontSize(count: number): number {
   if (count > 8) return 15
   return 18
 }
+
+/** Longueur disponible (unités SVG de la roue) pour un libellé, entre le moyeu et le bord. */
+export const LABEL_SPAN = 120
+/** Distance du centre de la roue au milieu des libellés. */
+export const LABEL_RADIUS = 120
+
+/** Nombre de caractères qui tiennent dans LABEL_SPAN à cette taille de police (chasse moyenne Marianne). */
+export function labelMaxChars(fontSize: number): number {
+  return Math.floor(LABEL_SPAN / (fontSize * 0.57))
+}
+
+function glyphWidth(char: string): number {
+  if (/[MWmw]/.test(char)) return 0.85
+  if (/[A-Z]/.test(char)) return 0.68
+  if (/[a-zà-ÿ0-9]/.test(char)) return 0.55
+  return 0.4
+}
+
+/** Longueur imposée (textLength) si le libellé risque de dépasser malgré la troncature, sinon undefined. */
+export function labelTextLength(label: string, fontSize: number): number | undefined {
+  const estimate = [...label].reduce((sum, char) => sum + glyphWidth(char), 0) * fontSize
+  return estimate > LABEL_SPAN ? LABEL_SPAN : undefined
+}
