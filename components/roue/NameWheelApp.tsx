@@ -16,6 +16,7 @@ import { AppHeader } from "./AppHeader"
 import { AuraBackground } from "./AuraBackground"
 import { FINALE_SPIN_MS, FinaleView } from "./FinaleView"
 import { GridView } from "./GridView"
+import { IntroSplash } from "./IntroSplash"
 import { ModeSwitch } from "./ModeSwitch"
 import { ParticipantsDrawer } from "./ParticipantsDrawer"
 import { RecapView } from "./RecapView"
@@ -32,7 +33,8 @@ const MODE_TARGET: Record<DisplayMode, string> = { wheel: "la roue", grid: "la g
 function isInteractiveTarget(target: EventTarget | null): boolean {
   return (
     target instanceof HTMLElement &&
-    target.closest("input, textarea, select, button, a, [contenteditable='true'], [role='radio'], [role='tab']") !== null
+    target.closest("input, textarea, select, button, a, [contenteditable='true'], [role='radio'], [role='tab']") !==
+      null
   )
 }
 
@@ -61,6 +63,13 @@ export function NameWheelApp() {
   const appRef = useRef<HTMLDivElement>(null)
   const drawAreaRef = useRef<HTMLDivElement>(null)
   const stopRainRef = useRef<(() => void) | null>(null)
+  const [intro, setIntro] = useState<"playing" | "revealing" | "settled" | "done">("playing")
+  const wheelSvgRef = useRef<SVGSVGElement>(null)
+  const introTargetRef = mode === "wheel" ? wheelSvgRef : drawAreaRef
+  const onIntroReveal = useCallback(() => setIntro((s) => (s === "playing" ? "revealing" : s)), [])
+  const onIntroSettle = useCallback(() => setIntro((s) => (s === "playing" || s === "revealing" ? "settled" : s)), [])
+  const onIntroExited = useCallback(() => setIntro("done"), [])
+  const introActive = intro === "playing" || intro === "revealing"
   const fact = useNameFact(selected)
 
   useEffect(() => () => stopRainRef.current?.(), [])
@@ -75,7 +84,11 @@ export function NameWheelApp() {
       const a = app.getBoundingClientRect()
       const r = area.getBoundingClientRect()
       const swatch = colorsFor(drawn)[index]
-      burstConfetti(app, { x: r.left - a.left + r.width / 2, y: r.top - a.top + 12 }, confettiColors(swatch.bg, swatch.ink))
+      burstConfetti(
+        app,
+        { x: r.left - a.left + r.width / 2, y: r.top - a.top + 12 },
+        confettiColors(swatch.bg, swatch.ink),
+      )
     },
     [startTimer, reducedMotion],
   )
@@ -138,7 +151,10 @@ export function NameWheelApp() {
   }, [selected, names, record, readTimer, resetTimer, setNames])
 
   const replay = useCallback(() => {
-    const again = mergeNames([], entries.map((e) => e.name)).names
+    const again = mergeNames(
+      [],
+      entries.map((e) => e.name),
+    ).names
     clearLog()
     resetDraw()
     setStage("play")
@@ -199,8 +215,8 @@ export function NameWheelApp() {
   const primary = finaleReady ? launchFinale : launch
   const primaryRef = useRef(primary)
   useEffect(() => {
-    primaryRef.current = stage === "play" ? primary : () => {}
-  }, [primary, stage])
+    primaryRef.current = stage === "play" && !introActive ? primary : () => {}
+  }, [primary, stage, introActive])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -233,9 +249,20 @@ export function NameWheelApp() {
   )
 
   return (
-    <div ref={appRef} className={cn(styles.app, selected && styles.won)} style={winStyle}>
-      <AuraBackground />
-      <AppHeader names={names} colors={colors} onOpenParticipants={openParticipants} />
+    <div
+      ref={appRef}
+      className={cn(
+        styles.app,
+        selected && styles.won,
+        intro === "playing" && styles.pre,
+        introActive && styles.hideView,
+      )}
+      style={winStyle}
+    >
+      <AuraBackground visible={intro !== "playing"} />
+      <div className={cn(styles.reveal, styles.fromTop)} style={{ "--d": "0.05s" } as CSSProperties}>
+        <AppHeader names={names} colors={colors} onOpenParticipants={openParticipants} />
+      </div>
 
       <main className={cn(styles.stage, stage === "recap" && styles.stageSingle)}>
         {stage === "recap" ? (
@@ -243,63 +270,82 @@ export function NameWheelApp() {
         ) : (
           <>
             <div className={styles.drawCol}>
-              <ModeSwitch value={mode} onChange={setMode} disabled={drawing || inFinale} />
+              <div className={cn(styles.reveal, styles.fromTop)} style={{ "--d": "0.15s" } as CSSProperties}>
+                <ModeSwitch value={mode} onChange={setMode} disabled={drawing || inFinale} />
+              </div>
               <div ref={drawAreaRef} className={styles.drawArea}>
                 <span className={styles.glow} aria-hidden />
-                {finaleReady || inFinale ? (
-                  <FinaleView
-                    name={names[0] ?? selected ?? ""}
-                    swatch={colors[0] ?? PASTELS[0]}
-                    stage={stage === "finale" ? "revealed" : stage === "finale-spinning" ? "spinning" : "ready"}
-                  />
-                ) : (
-                  <>
-                    {mode === "wheel" && (
-                      <WheelView
-                        names={names}
-                        colors={colors}
-                        rotation={draw.rotation}
-                        animate={draw.animateRotation}
-                        durationMs={draw.durationMs}
-                        spinning={drawing}
-                        winnerIndex={winnerIndex}
-                      />
-                    )}
-                    {mode === "grid" && (
-                      <GridView names={names} colors={colors} highlightIndex={draw.highlightIndex} winnerIndex={winnerIndex} />
-                    )}
-                    {mode === "star" && (
-                      <StarView names={names} colors={colors} highlightIndex={draw.highlightIndex} winnerIndex={winnerIndex} />
-                    )}
-                  </>
-                )}
+                <div className={styles.view}>
+                  {finaleReady || inFinale ? (
+                    <FinaleView
+                      name={names[0] ?? selected ?? ""}
+                      swatch={colors[0] ?? PASTELS[0]}
+                      stage={stage === "finale" ? "revealed" : stage === "finale-spinning" ? "spinning" : "ready"}
+                    />
+                  ) : (
+                    <>
+                      {mode === "wheel" && (
+                        <WheelView
+                          names={names}
+                          colors={colors}
+                          rotation={draw.rotation}
+                          animate={draw.animateRotation}
+                          durationMs={draw.durationMs}
+                          spinning={drawing}
+                          winnerIndex={winnerIndex}
+                          svgRef={wheelSvgRef}
+                        />
+                      )}
+                      {mode === "grid" && (
+                        <GridView
+                          names={names}
+                          colors={colors}
+                          highlightIndex={draw.highlightIndex}
+                          winnerIndex={winnerIndex}
+                        />
+                      )}
+                      {mode === "star" && (
+                        <StarView
+                          names={names}
+                          colors={colors}
+                          highlightIndex={draw.highlightIndex}
+                          winnerIndex={winnerIndex}
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
               {stage === "play" && (
-                <SpinButton
-                  label={spinLabel}
-                  icon={finaleReady ? "finale" : "spin"}
-                  busy={drawing}
-                  pulse={finaleReady}
-                  disabled={!finaleReady && (names.length < 2 || drawing)}
-                  onClick={primary}
-                  hint={spinHint}
-                />
+                <div className={cn(styles.reveal, styles.fromBottom)} style={{ "--d": "0.25s" } as CSSProperties}>
+                  <SpinButton
+                    label={spinLabel}
+                    icon={finaleReady ? "finale" : "spin"}
+                    busy={drawing}
+                    pulse={finaleReady}
+                    disabled={!finaleReady && (names.length < 2 || drawing)}
+                    onClick={primary}
+                    hint={spinHint}
+                  />
+                </div>
               )}
             </div>
 
-            <ResultPanel
-              selectedName={selected}
-              participantCount={names.length}
-              drawing={drawing || stage === "finale-spinning"}
-              isFinale={stage === "finale"}
-              finalistName={finaleReady ? names[0] : null}
-              timer={timer}
-              fact={fact}
-              onRemove={() => removeSelected(false)}
-              onRemoveAndSpin={() => removeSelected(true)}
-              onFinish={finishRound}
-              onOpenParticipants={openParticipants}
-            />
+            <div className={cn(styles.reveal, styles.fromRight)} style={{ "--d": "0.3s" } as CSSProperties}>
+              <ResultPanel
+                selectedName={selected}
+                participantCount={names.length}
+                drawing={drawing || stage === "finale-spinning"}
+                isFinale={stage === "finale"}
+                finalistName={finaleReady ? names[0] : null}
+                timer={timer}
+                fact={fact}
+                onRemove={() => removeSelected(false)}
+                onRemoveAndSpin={() => removeSelected(true)}
+                onFinish={finishRound}
+                onOpenParticipants={openParticipants}
+              />
+            </div>
           </>
         )}
       </main>
@@ -316,6 +362,16 @@ export function NameWheelApp() {
         onResumeLastList={resumeLastList}
         returnFocusRef={drawerOpenerRef}
       />
+
+      {intro !== "done" && (
+        <IntroSplash
+          targetRef={introTargetRef}
+          ringRatio={mode === "wheel" ? 412 / 420 : 0.9}
+          onReveal={onIntroReveal}
+          onSettle={onIntroSettle}
+          onExited={onIntroExited}
+        />
+      )}
     </div>
   )
 }
