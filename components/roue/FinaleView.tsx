@@ -19,7 +19,7 @@ export function FinaleView({ name, swatch, stage }: Props) {
       <div className={styles.discWrap}>
         {!revealed && (
           <svg className={styles.pointer} viewBox="0 0 30 38" aria-hidden>
-            <path d="M15 37 3.2 15.5A13 13 0 1 1 26.8 15.5Z" />
+            <path d="M15 37 5.17 19.88A12 12 0 1 1 24.83 19.88Z" />
             <circle cx="15" cy="13" r="4.5" />
           </svg>
         )}
