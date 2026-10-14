@@ -4,80 +4,44 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a "Roue des noms" (Name Wheel) application - an interactive wheel spinner that randomly selects names. Built with Next.js 15, React 19, and TypeScript, using shadcn/ui components and Tailwind CSS.
+« Roue des noms » : tirage au sort de noms pour les rituels d'équipe (daily, tour de table), pensé pour n'importe quel service de l'État. Next.js 15 (App Router), React 19, TypeScript, Tailwind + modules CSS, shadcn/ui. Style inspiré du DSFR **sans bibliothèque DSFR** (police Marianne, couleurs, formes, focus), sans bloc-marque.
 
-## Development Commands
+## Commandes
 
 ```bash
-# Development server (runs on port 3001)
-npm run dev
-
-# Production build
+npm run dev -- -p 3001   # serveur de dev
+npm test                 # tests Vitest (logique pure dans lib/)
+npm run typecheck        # tsc --noEmit (doit être vert)
 npm run build
-
-# Start production server
-npm start
-
-# Lint
-npm run lint
 ```
+
+Pas de configuration ESLint : ne pas lancer `npm run lint` (assistant interactif).
 
 ## Architecture
 
-### Single-Page Application Structure
+- `app/page.tsx` → `<Suspense><NameWheelApp/></Suspense>`.
+- `components/roue/NameWheelApp.tsx` orchestre l'app : état de jeu `stage` (`play | finale-spinning | finale | recap`), état de l'intro (`playing | revealing | settled | done`), nom tiré (`selected`), panneau Participants.
+- Vues : `WheelView` (SVG), `GridView`, `StarView`, `FinaleView`, `RecapView`, `ResultPanel`, `ParticipantsDrawer` (Radix Dialog), `IntroSplash` (Web Animations API, FLIP du pictogramme `WheelMark` vers la roue).
+- Hooks (`hooks/`) :
+  - `useNamesUrlState` — l'URL est la source de vérité (`?names=a,b&mode=grid`), `pushState`.
+  - `useDraw` — rotation de la roue / suite de cases surlignées, verrou anti-double tirage.
+  - `useSpeakingTimer` — minuteur 2 min, démarrage auto.
+  - `useSessionLog` — ordre de passage, mémoire seulement.
+  - `useNameHistory` — `localStorage` `roue-des-noms:history:v1`, 30 noms max, « dernière liste » ; les noms d'un lien partagé sont comptés une fois au chargement.
+  - `useNameFact`, `usePrefersReducedMotion`.
+- Logique pure testée (`lib/`) :
+  - `names` — normalisation, déduplication, URL.
+  - `palette` — 8 pastels DSFR, couleur stable par nom, jamais deux voisins identiques.
+  - `geometry`, `spin` — angles en degrés (repère SVG), part 0 sous le pointeur au repos.
+  - `history`, `timer`, `sessionLog`.
+- Anecdotes : `lib/nameFacts/` + route `app/api/name-fact`.
 
-The entire application is contained in a single page component at `app/page.tsx`. This is intentional - the app is simple enough that splitting into multiple components would add unnecessary complexity.
+## Conventions
 
-**Key architectural decision**: Names are stored in URL query parameters (`?names=name1,name2,name3`) to enable easy sharing. The URL is the source of truth and is synced bidirectionally with component state.
-
-### Main Component State (`app/page.tsx`)
-
-The NameWheel component manages several interconnected pieces of state:
-
-- **names**: Array of name strings, synced with URL params
-- **spinning**: Boolean for animation state
-- **selectedName**: Currently selected name (null when not spinning/selected)
-- **rotationAngle**: Current rotation in degrees
-- **isTransitioning**: Controls CSS transition (disabled during angle reset)
-- **buttonMode**: Either "spin" or "remove" (changes after selection)
-- **timerActive/timeLeft**: 2-minute countdown timer state
-
-### URL Sync Pattern
-
-The component uses a bidirectional sync pattern with `useSearchParams` and `window.history.pushState`:
-
-1. URL changes trigger state updates via `useEffect` (lines 110-117)
-2. State changes update URL via separate `useEffect` (lines 91-107)
-3. Uses `isUpdatingFromUrl` ref to prevent infinite loops
-
-### Wheel Rendering System
-
-The wheel uses CSS `conic-gradient` for colored segments (lines 263-270) rather than individual div elements. This is more performant and enables smooth gradients.
-
-**Name positioning**: Names are positioned using absolute positioning with rotation transforms. Each name's angle is calculated based on segment count, with the text counter-rotated to remain readable (lines 286-329).
-
-**Selection indicator**: A red segment border rotates to point at the winning segment. This rotates while the wheel background remains fixed (lines 432-458).
-
-### Animation Mechanics
-
-When spinning (lines 198-242):
-1. Calculate random target segment
-2. Add 5-8 full rotations for dramatic effect
-3. Apply 4-second cubic-bezier transition
-4. After animation, reset angle to normalized position (without transition) to prevent accumulating rotation values
-5. Re-enable transition after 50ms delay
-
-### Timer System
-
-After name selection, a 2-minute countdown timer can be started (lines 119-158):
-- Changes color from green → amber → red as time decreases
-- Uses `setInterval` with proper cleanup
-- Resets when selected name is removed
-
-## Key Implementation Notes
-
-- **Port**: Dev server runs on port 3001 (not default 3000)
-- **TypeScript/ESLint**: Build errors are ignored in `next.config.mjs` - this is a v0.dev generated project
-- **Client-side only**: The main page uses `"use client"` directive
-- **No backend**: Pure client-side application, no API routes or database
-- **shadcn/ui**: Uses pre-built UI components from `components/ui/` - these should not be modified directly
+- Couleurs : variables `--rn-*` dans `app/globals.css` (clair + `.dark`). Le participant tiré expose `--win` / `--win-ink` (déclarées avec `@property`, animables).
+- Thème clair par défaut quel que soit le système (`enableSystem={false}`) ; le bouton « Thème » passe au sombre DSFR.
+- Icônes : `@radix-ui/react-icons` uniquement (`lucide-react` reste pour `components/ui/`).
+- **Ne pas modifier `components/ui/`** — restyler via les variables CSS et la config Tailwind.
+- Toute animation respecte `prefers-reduced-motion`.
+- Polices Marianne dans `app/fonts/` (extraites de `@gouvfr/dsfr@1.12.1`, usage réservé aux services de l'État).
+- Ne pas remettre de glob racine (`"*.{js,ts,…}"`) dans `tailwind.config.ts` : il fait surveiller la racine du dépôt et provoque des boucles de Fast Refresh.
