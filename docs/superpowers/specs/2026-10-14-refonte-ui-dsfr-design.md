@@ -70,7 +70,7 @@ En mode sombre, on garde les mêmes pastels pour la roue (ce sont des « objets 
 
 ### Typographie
 
-- Police **Marianne** (Light 300, Regular 400, Medium 500, Bold 700, ExtraBold 800), en `woff2` dans `public/fonts/`, chargée via `next/font/local` ; repli `Arial, sans-serif`.
+- Police **Marianne** (Light 300, Regular 400, Medium 500, Bold 700 ; le DSFR ne fournit pas d'ExtraBold, Bold est donc la graisse maximale), en `woff2` dans `app/fonts/` (extraits du paquet npm `@gouvfr/dsfr@1.12.1`, sans l'installer), chargée via `next/font/local` ; repli `Arial, sans-serif`.
 - Échelle DSFR dans `tailwind.config.ts` (`xs` 12/20, `sm` 14/24, `base` 16/24, `lg` 18/28, `xl` 20/28, `2xl` 22/28, `3xl` 28/36, `4xl` 32/40, `5xl` 40/48, `display` 46/52).
 
 ### Formes et interactions
@@ -139,7 +139,7 @@ En mode sombre, on garde les mêmes pastels pour la roue (ce sont des « objets 
 
 - Avant le premier tirage, on affiche un encadré en pointillés : « Prêt pour le tirage » et le nombre de participants.
 - Après un tirage :
-  - **En-tête de la carte** : fond `--win`, bordure haute de 4px `--win-ink`, la mention « Au tour de » au-dessus, puis le nom en 46px ExtraBold, qui apparaît lettre par lettre.
+  - **En-tête de la carte** : fond `--win`, bordure haute de 4px `--win-ink`, la mention « Au tour de » au-dessus, puis le nom en 46px Bold, qui apparaît lettre par lettre.
   - **Minuteur** (`useSpeakingTimer`) : **démarre automatiquement** à la révélation. *Changement assumé : aujourd'hui il faut le lancer à la main.* Il affiche « Temps de parole » et le temps en chiffres tabulaires. La barre de progression est `--win-ink` pendant les 60 premières secondes, passe en avertissement à partir de 60 s puis en erreur à partir de 90 s (on conserve la logique vert → ambre → rouge). Le dépassement est affiché en `+0:12`.
   - **Encart contextuel** : un contrôle segmenté « Le saviez-vous ? | Horoscope ».
     - Le saviez-vous ? : contenu de `/api/name-fact` (`useNameFact`), avec un squelette pendant le chargement. L'encart est masqué si l'appel échoue.
@@ -270,7 +270,7 @@ lib/
   - `spin` : l'angle cible amène bien la part visée sous le pointeur, normalisation, retournement des noms ;
   - `useNameHistory` (sous forme de store pur) : incrément, plafond, éviction, dernière liste, `localStorage` qui lève une exception ;
   - `useNamesUrlState` (parse/serialize) : aller-retour, doublons, noms vides.
-- `npm run build` et `npm run lint` passent.
+- `npm run build` passe et `npx tsc --noEmit` ne signale aucune erreur hormis celle qui existe déjà dans `components/ui/calendar.tsx`. Le projet n'a pas de configuration ESLint : `npm run lint` lancerait un assistant interactif, il n'est donc pas utilisé.
 - Vérification manuelle avec Playwright sur les parcours : intro (complète et passée), tirage dans les 3 modes, retrait et relance, finale, récap, panneau avec historique, bascule de thème, mobile 375px, `prefers-reduced-motion`.
 
 ## 12. Hors périmètre
