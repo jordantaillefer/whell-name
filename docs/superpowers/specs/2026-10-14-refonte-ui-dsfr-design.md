@@ -270,7 +270,7 @@ lib/
   - `spin` : l'angle cible amène bien la part visée sous le pointeur, normalisation, retournement des noms ;
   - `useNameHistory` (sous forme de store pur) : incrément, plafond, éviction, dernière liste, `localStorage` qui lève une exception ;
   - `useNamesUrlState` (parse/serialize) : aller-retour, doublons, noms vides.
-- `npm run build` passe et `npx tsc --noEmit` ne signale aucune erreur hormis celle qui existe déjà dans `components/ui/calendar.tsx`. Le projet n'a pas de configuration ESLint : `npm run lint` lancerait un assistant interactif, il n'est donc pas utilisé.
+- `npm run build` passe et `npx tsc --noEmit` ne signale aucune erreur (l'erreur préexistante de `components/ui/calendar.tsx` a été corrigée). Le projet n'a pas de configuration ESLint : `npm run lint` lancerait un assistant interactif, il n'est donc pas utilisé.
 - Vérification manuelle avec Playwright sur les parcours : intro (complète et passée), tirage dans les 3 modes, retrait et relance, finale, récap, panneau avec historique, bascule de thème, mobile 375px, `prefers-reduced-motion`.
 
 ## 12. Hors périmètre

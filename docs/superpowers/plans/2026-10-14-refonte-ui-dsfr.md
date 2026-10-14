@@ -20,7 +20,7 @@
 - Pas de bibliothèque DSFR installée (`@codegouvfr/react-dsfr`, `@gouvfr/dsfr` interdits en dépendance). Le paquet `@gouvfr/dsfr@1.12.1` sert uniquement à extraire les polices Marianne, avec `npm pack`.
 - Pas de bloc-marque « République Française », pas de Marianne (logo), pas de nom de projet. Le titre est exactement « Roue des noms » et le sous-titre exactement « Tirage au sort pour vos rituels d'équipe ».
 - Icônes : uniquement `@radix-ui/react-icons` dans le nouveau code. Aucun nouvel import de `lucide-react`, qui reste dans `package.json` parce que `components/ui/` l'utilise.
-- Ne jamais modifier `components/ui/*`.
+- Ne jamais modifier `components/ui/*`. Seule exception : le correctif TypeScript de `components/ui/calendar.tsx` (API `Chevron` de react-day-picker v9), déjà commité avant la tâche 1 à la demande de l'utilisateur.
 - Thème : clair par défaut, quel que soit le système (`defaultTheme="light"`, `enableSystem={false}`). Le mode sombre est celui du DSFR.
 - Contrat d'URL inchangé : `?names=a,b,c&mode=wheel|grid|star`. Les anciens liens (virgules non encodées) doivent continuer de fonctionner.
 - Historique `localStorage` sous la clé `roue-des-noms:history:v1`, plafonné à 30 noms. Le journal de session reste en mémoire uniquement.
@@ -29,7 +29,7 @@
 - `prefers-reduced-motion: reduce` coupe l'intro, l'aurore animée et les confettis, et ramène la rotation à 300 ms.
 - Vérifications à la fin de chaque tâche :
   - `npm test` doit être vert ;
-  - `npx tsc --noEmit` ne doit signaler **que** l'erreur existante `components/ui/calendar.tsx(57,9)` ;
+  - `npx tsc --noEmit` ne doit signaler **aucune** erreur ;
   - `npm run build` doit réussir (quand la tâche touche l'interface).
   - Ne pas lancer `npm run lint` : il n'y a pas de configuration ESLint et la commande ouvre un assistant interactif.
 - Serveur de dev : `npm run dev -- -p 3001`.
@@ -1628,7 +1628,7 @@ export function useDraw({ mode, reducedMotion, onLanded }: Options): DrawControl
 - [ ] **Step 9 : Vérifier les types**
 
 Run : `npx tsc --noEmit`
-Expected : une seule erreur, `components/ui/calendar.tsx(57,9)` (elle existait déjà)
+Expected : aucune erreur
 
 - [ ] **Step 10 : Commit**
 
@@ -1935,7 +1935,7 @@ export function WheelMark({ size = 40, title, ref, ...rest }: Props) {
 - [ ] **Step 7 : Vérifier**
 
 Run : `npx tsc --noEmit && npm run build`
-Expected : seule l'erreur `calendar.tsx` existante apparaît, et le build réussit. L'ancienne page reste en place et s'affiche maintenant en Marianne, avec des coins carrés.
+Expected : aucune erreur de type, et le build réussit. L'ancienne page reste en place et s'affiche maintenant en Marianne, avec des coins carrés.
 
 - [ ] **Step 8 : Commit**
 
@@ -2379,7 +2379,7 @@ export function SpinButton({ label, icon, busy, disabled, pulse, hint, onClick }
 - [ ] **Step 7 : Vérifier les types**
 
 Run : `npx tsc --noEmit`
-Expected : seule l'erreur existante `calendar.tsx`
+Expected : aucune erreur
 
 - [ ] **Step 8 : Commit**
 
@@ -2795,7 +2795,7 @@ export function StarView({ names, colors, highlightIndex, winnerIndex }: Props) 
 - [ ] **Step 6 : Vérifier les types**
 
 Run : `npx tsc --noEmit`
-Expected : seule l'erreur existante `calendar.tsx`
+Expected : aucune erreur
 
 - [ ] **Step 7 : Commit**
 
@@ -3192,7 +3192,7 @@ function SelectedCard({
 - [ ] **Step 3 : Vérifier les types**
 
 Run : `npx tsc --noEmit`
-Expected : seule l'erreur existante `calendar.tsx`
+Expected : aucune erreur
 
 - [ ] **Step 4 : Commit**
 
@@ -3631,7 +3631,7 @@ export function ParticipantsDrawer({ open, onOpenChange, names, colors, history,
 - [ ] **Step 3 : Vérifier les types**
 
 Run : `npx tsc --noEmit`
-Expected : seule l'erreur existante `calendar.tsx`
+Expected : aucune erreur
 
 - [ ] **Step 4 : Commit**
 
@@ -3949,10 +3949,10 @@ export default function Page() {
 
 - [ ] **Step 4 : Vérifier les types, les tests et le build**
 
-Run : `npm test && npx tsc --noEmit; npm run build`
+Run : `npm test && npx tsc --noEmit && npm run build`
 Expected :
 - les tests passent ;
-- `tsc` ne signale que l'erreur existante `calendar.tsx` ;
+- `tsc` ne signale aucune erreur ;
 - le build réussit.
 
 - [ ] **Step 5 : Parcours dans le navigateur (Playwright ou à la main) avec `npm run dev -- -p 3001`**
@@ -4636,8 +4636,8 @@ export function NameWheelApp() {
 
 - [ ] **Step 5 : Vérifier**
 
-Run : `npm test && npx tsc --noEmit; npm run build`
-Expected : les tests passent, seule l'erreur `calendar.tsx` subsiste et le build réussit.
+Run : `npm test && npx tsc --noEmit && npm run build`
+Expected : les tests passent, `tsc` ne signale aucune erreur et le build réussit.
 
 - [ ] **Step 6 : Parcours dans le navigateur avec `?names=Alice,Bruno,Chloé`**
 
@@ -5052,8 +5052,8 @@ Voici le `return` complet après modification :
 
 - [ ] **Step 5 : Vérifier**
 
-Run : `npm test && npx tsc --noEmit; npm run build`
-Expected : les tests passent, seule l'erreur `calendar.tsx` subsiste et le build réussit.
+Run : `npm test && npx tsc --noEmit && npm run build`
+Expected : les tests passent, `tsc` ne signale aucune erreur et le build réussit.
 
 - [ ] **Step 6 : Parcours de l'intro dans le navigateur**
 
@@ -5117,7 +5117,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev -- -p 3001   # serveur de dev
 npm test                 # tests Vitest (logique pure dans lib/)
-npm run typecheck        # tsc --noEmit (1 erreur préexistante tolérée : components/ui/calendar.tsx)
+npm run typecheck        # tsc --noEmit (doit être vert)
 npm run build
 ```
 
@@ -5157,8 +5157,8 @@ Pas de configuration ESLint : ne pas lancer `npm run lint` (assistant interactif
 
 - [ ] **Step 3 : Vérification complète**
 
-Run : `npm test && npx tsc --noEmit; npm run build`
-Expected : tous les tests passent, seule l'erreur `calendar.tsx` subsiste et le build réussit.
+Run : `npm test && npx tsc --noEmit && npm run build`
+Expected : tous les tests passent, `tsc` ne signale aucune erreur et le build réussit.
 
 Puis refaire, d'un seul trait, les parcours des tâches 11 (étape 5), 12 (étape 6) et 13 (étape 6), en mode clair puis en mode sombre, à 1280 px puis à 375 px. Noter tout écart et le corriger avant le commit.
 
