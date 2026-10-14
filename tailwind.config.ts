@@ -10,6 +10,21 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['var(--font-marianne)', 'Arial', 'sans-serif']
+  		},
+  		fontSize: {
+  			xs: ['0.75rem', { lineHeight: '1.25rem' }],
+  			sm: ['0.875rem', { lineHeight: '1.5rem' }],
+  			base: ['1rem', { lineHeight: '1.5rem' }],
+  			lg: ['1.125rem', { lineHeight: '1.75rem' }],
+  			xl: ['1.25rem', { lineHeight: '1.75rem' }],
+  			'2xl': ['1.375rem', { lineHeight: '1.75rem' }],
+  			'3xl': ['1.75rem', { lineHeight: '2.25rem' }],
+  			'4xl': ['2rem', { lineHeight: '2.5rem' }],
+  			'5xl': ['2.5rem', { lineHeight: '3rem' }],
+  			display: ['2.875rem', { lineHeight: '3.25rem' }]
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -64,8 +79,8 @@ const config: Config = {
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			md: 'var(--radius)',
+  			sm: 'var(--radius)'
   		},
   		keyframes: {
   			'accordion-down': {
