@@ -1,0 +1,70 @@
+.recap {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: min(560px, 100%);
+  margin: 0 auto;
+  padding: 28px;
+  background: var(--rn-bg);
+  border: 1px solid var(--rn-border);
+  box-shadow: 0 24px 40px -22px rgba(0, 0, 80, 0.25);
+  animation: cardIn 0.6s cubic-bezier(.2, 1.3, .4, 1) both;
+}
+.eyebrow { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rn-mute); }
+.title { margin: -10px 0 0; font-size: 28px; line-height: 36px; font-weight: 700; color: var(--rn-text); }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0; border: 1px solid var(--rn-border); }
+.stat { display: flex; flex-direction: column-reverse; padding: 10px 14px; }
+.stat + .stat { border-left: 1px solid var(--rn-border); }
+.stat dt { font-size: 12px; color: var(--rn-mute); }
+.stat dd { margin: 0; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--rn-text); }
+.timeline { max-height: min(40vh, 360px); margin: 0; padding: 0; overflow: auto; list-style: none; }
+.row {
+  display: grid;
+  grid-template-columns: 24px 14px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 0;
+  font-size: 15px;
+  color: var(--rn-text);
+  border-bottom: 1px solid var(--rn-border);
+  animation: rowIn 0.4s ease both;
+  animation-delay: calc(0.2s + var(--i) * 0.05s);
+}
+.rank { font-size: 12px; text-align: right; color: var(--rn-mute); }
+.dot { width: 12px; height: 12px; border-radius: 50%; }
+.name { overflow-wrap: anywhere; }
+.time { font-size: 14px; font-variant-numeric: tabular-nums; color: var(--rn-mute); }
+.over .time { font-weight: 700; color: var(--rn-warning); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--rn-bg);
+  background: var(--rn-blue);
+  border: 0;
+  cursor: pointer;
+}
+.primary:hover { background: var(--rn-blue-hover); }
+.secondary {
+  padding: 10px 20px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--rn-blue);
+  background: var(--rn-bg);
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--rn-blue);
+  cursor: pointer;
+}
+
+@keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes rowIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .recap, .row { animation: none; }
+}
