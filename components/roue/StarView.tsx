@@ -41,8 +41,8 @@ export function StarView({ names, colors, highlightIndex, winnerIndex }: Props) 
               strokeWidth={highlighted ? 4 : 2}
             />
             <text
-              x={C + Math.cos(angle) * OUTER * 0.45}
-              y={C + Math.sin(angle) * OUTER * 0.45}
+              x={(C + Math.cos(angle) * OUTER * 0.45).toFixed(2)}
+              y={(C + Math.sin(angle) * OUTER * 0.45).toFixed(2)}
               fill={swatch.ink}
               fontSize={fontSize}
               fontWeight={win ? 700 : 500}

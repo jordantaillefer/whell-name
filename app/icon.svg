@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -20 40 40">
   <circle r="19" fill="#fff" stroke="#DDDDDD" stroke-width=".8"/>
   <path d="M0 0L-6.506 -15.706A17 17 0 0 1 6.506 -15.706Z" fill="#000091" stroke="#fff" stroke-width=".9"/>
-  <path d="M0 0L6.506 -15.706A17 17 0 0 1 15.706 -6.506Z" fill="#C3FAD5" stroke="#fff" stroke-width=".9"/>
-  <path d="M0 0L15.706 -6.506A17 17 0 0 1 15.706 6.506Z" fill="#FEE9E5" stroke="#fff" stroke-width=".9"/>
-  <path d="M0 0L15.706 6.506A17 17 0 0 1 6.506 15.706Z" fill="#FEF7DA" stroke="#fff" stroke-width=".9"/>
-  <path d="M0 0L6.506 15.706A17 17 0 0 1 -6.506 15.706Z" fill="#FEE7FC" stroke="#fff" stroke-width=".9"/>
-  <path d="M0 0L-6.506 15.706A17 17 0 0 1 -15.706 6.506Z" fill="#C7F6FC" stroke="#fff" stroke-width=".9"/>
-  <path d="M0 0L-15.706 6.506A17 17 0 0 1 -15.706 -6.506Z" fill="#F7EBE5" stroke="#fff" stroke-width=".9"/>
-  <path d="M0 0L-15.706 -6.506A17 17 0 0 1 -6.506 -15.706Z" fill="#E6EEFE" stroke="#fff" stroke-width=".9"/>
+  <path d="M0 0L6.506 -15.706A17 17 0 0 1 15.706 -6.506Z" fill="#B3F0E4" stroke="#fff" stroke-width=".9"/>
+  <path d="M0 0L15.706 -6.506A17 17 0 0 1 15.706 6.506Z" fill="#FDCFC4" stroke="#fff" stroke-width=".9"/>
+  <path d="M0 0L15.706 6.506A17 17 0 0 1 6.506 15.706Z" fill="#F4E89B" stroke="#fff" stroke-width=".9"/>
+  <path d="M0 0L6.506 15.706A17 17 0 0 1 -6.506 15.706Z" fill="#F7C8F1" stroke="#fff" stroke-width=".9"/>
+  <path d="M0 0L-6.506 15.706A17 17 0 0 1 -15.706 6.506Z" fill="#B4EBF5" stroke="#fff" stroke-width=".9"/>
+  <path d="M0 0L-15.706 6.506A17 17 0 0 1 -15.706 -6.506Z" fill="#FDDB9E" stroke="#fff" stroke-width=".9"/>
+  <path d="M0 0L-15.706 -6.506A17 17 0 0 1 -6.506 -15.706Z" fill="#BDF0C9" stroke="#fff" stroke-width=".9"/>
   <circle r="4.5" fill="#fff" stroke="#DDDDDD" stroke-width=".6"/>
   <circle r="1.8" fill="#000091"/>
 </svg>

@@ -33,6 +33,8 @@ type Props = {
   onResumeLastList: () => void
   /** Élément qui reprend le focus à la fermeture (le bouton qui a ouvert le panneau). */
   returnFocusRef?: RefObject<HTMLElement | null>
+  showExtras: boolean
+  onShowExtrasChange: (show: boolean) => void
 }
 
 export function ParticipantsDrawer({
@@ -46,6 +48,8 @@ export function ParticipantsDrawer({
   onClear,
   onResumeLastList,
   returnFocusRef,
+  showExtras,
+  onShowExtrasChange,
 }: Props) {
   const [input, setInput] = useState("")
   const [message, setMessage] = useState<string | null>(null)
@@ -217,6 +221,29 @@ export function ParticipantsDrawer({
                 )}
               </section>
             )}
+          </div>
+
+          <div className={styles.prefs}>
+            <div className={styles.toggle}>
+              <input
+                type="checkbox"
+                role="switch"
+                id="extras-toggle"
+                className={styles.toggleInput}
+                checked={showExtras}
+                onChange={(e) => onShowExtrasChange(e.target.checked)}
+                aria-describedby="extras-hint"
+              />
+              <label htmlFor="extras-toggle" className={styles.toggleLabel}>
+                « Le saviez-vous ? » et horoscope
+                <span className={styles.toggleState} aria-hidden>
+                  {showExtras ? "Affichés" : "Masqués"}
+                </span>
+              </label>
+            </div>
+            <p id="extras-hint" className={styles.hint}>
+              Contenus ludiques affichés sous le minuteur. Masquez-les pour un usage plus formel.
+            </p>
           </div>
 
           {history.available && (

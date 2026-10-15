@@ -2,7 +2,7 @@ import type { Ref, SVGProps } from "react"
 import { wedgePath } from "@/lib/geometry"
 import { PASTELS } from "@/lib/palette"
 
-const PARTS = PASTELS.map((swatch, i) => ({
+const PARTS = PASTELS.slice(0, 8).map((swatch, i) => ({
   d: wedgePath(17, -112.5 + i * 45, -67.5 + i * 45),
   fill: i === 0 ? "#000091" : swatch.bg,
 }))

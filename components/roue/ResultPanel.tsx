@@ -26,6 +26,8 @@ type Props = {
   finalistName: string | null
   timer: SpeakingTimer
   fact: NameFactState
+  /** « Le saviez-vous ? » et horoscope affichés (réglable dans le panneau Participants). */
+  showExtras: boolean
   onRemove: () => void
   onRemoveAndSpin: () => void
   onFinish: () => void
@@ -52,7 +54,7 @@ export function ResultPanel(props: Props) {
   )
 }
 
-function EmptyState({ participantCount, drawing, finalistName, onOpenParticipants }: Props) {
+function EmptyState({ participantCount, drawing, finalistName, showExtras, onOpenParticipants }: Props) {
   if (drawing) {
     return (
       <div className={styles.empty}>
@@ -84,8 +86,11 @@ function EmptyState({ participantCount, drawing, finalistName, onOpenParticipant
   return (
     <div className={styles.empty}>
       <strong className={styles.emptyTitle}>Prêt pour le tirage</strong>
-      {participantCount} participants dans la roue. Lancez le tirage : le nom tiré, un minuteur de 2 minutes et une
-      anecdote s'afficheront ici.
+      {participantCount} participants dans la roue. Lancez le tirage : le nom tiré
+      {showExtras
+        ? ", un minuteur de 2 minutes et une anecdote s'afficheront"
+        : " et un minuteur de 2 minutes s'afficheront"}{" "}
+      ici.
     </div>
   )
 }
@@ -96,6 +101,7 @@ function SelectedCard({
   isFinale,
   timer,
   fact,
+  showExtras,
   onRemove,
   onRemoveAndSpin,
   onFinish,
@@ -143,7 +149,7 @@ function SelectedCard({
         </div>
       </div>
 
-      {factAvailable && (
+      {showExtras && factAvailable && (
         <div className={styles.tabs} role="tablist" aria-label="Pour aller plus loin">
           <button
             type="button"
@@ -171,40 +177,42 @@ function SelectedCard({
           </button>
         </div>
       )}
-      <div
-        id="result-extra"
-        role={factAvailable ? "tabpanel" : undefined}
-        aria-labelledby={factAvailable ? (activeTab === "fact" ? "tab-fact" : "tab-horoscope") : undefined}
-        className={styles.panel}
-      >
-        {activeTab === "fact" ? (
-          fact.loading ? (
-            <>
-              <span className={styles.skeleton} />
-              <span className={styles.skeleton} style={{ width: "70%" }} />
-            </>
+      {showExtras && (
+        <div
+          id="result-extra"
+          role={factAvailable ? "tabpanel" : undefined}
+          aria-labelledby={factAvailable ? (activeTab === "fact" ? "tab-fact" : "tab-horoscope") : undefined}
+          className={styles.panel}
+        >
+          {activeTab === "fact" ? (
+            fact.loading ? (
+              <>
+                <span className={styles.skeleton} />
+                <span className={styles.skeleton} style={{ width: "70%" }} />
+              </>
+            ) : (
+              <>
+                <p>« {fact.fact} »</p>
+                {fact.total > 1 && (
+                  <p className={styles.panelMeta}>
+                    1 anecdote choisie parmi {fact.total.toLocaleString("fr-FR")} possibles.
+                  </p>
+                )}
+              </>
+            )
           ) : (
             <>
-              <p>« {fact.fact} »</p>
-              {fact.total > 1 && (
-                <p className={styles.panelMeta}>
-                  1 anecdote choisie parmi {fact.total.toLocaleString("fr-FR")} possibles.
+              {!factAvailable && (
+                <p className={styles.panelTitle}>
+                  <StarIcon aria-hidden />
+                  Horoscope du jour
                 </p>
               )}
+              <p>« {getDailyHoroscope(selectedName)} »</p>
             </>
-          )
-        ) : (
-          <>
-            {!factAvailable && (
-              <p className={styles.panelTitle}>
-                <StarIcon aria-hidden />
-                Horoscope du jour
-              </p>
-            )}
-            <p>« {getDailyHoroscope(selectedName)} »</p>
-          </>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       <div className={styles.actions}>
         <button

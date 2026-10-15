@@ -28,7 +28,9 @@
   font-weight: 500;
 }
 .highlight { outline: 2px solid var(--rn-blue); outline-offset: 2px; transform: scale(1.04); }
-.won .tile:not(.winner) { opacity: 0.45; }
+/* Cases non tirées estompées : le fond pâlit, le texte reste lisible (≥ 4,5:1) */
+.won .tile:not(.winner) { color: color-mix(in srgb, var(--tile-ink) 80%, var(--rn-bg)); background: color-mix(in srgb, var(--tile-bg) 50%, var(--rn-bg)); box-shadow: none; }
+:global(.dark) .won .tile:not(.winner) { color: var(--tile-ink); background: color-mix(in srgb, var(--tile-bg) 85%, var(--rn-bg)); }
 .winner {
   color: var(--tile-bg);
   background: var(--tile-ink);

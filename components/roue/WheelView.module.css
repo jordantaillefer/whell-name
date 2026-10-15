@@ -9,9 +9,13 @@
 .rim { fill: var(--rn-wheel-ring); stroke: var(--rn-border); }
 .empty { fill: var(--rn-bg-alt); }
 .emptyText { fill: var(--rn-mute); font-size: 16px; font-family: inherit; }
-.segment { transition: transform 0.5s cubic-bezier(.3, 1.6, .5, 1), opacity 0.5s ease; }
-.won .segment:not(.winner) { opacity: 0.45; }
-:global(.dark) .won .segment:not(.winner) { opacity: 0.7; }
+.segment { transition: transform 0.5s cubic-bezier(.3, 1.6, .5, 1); }
+.segment > path, .segment > circle, .segment text { transition: fill-opacity 0.5s ease, opacity 0.5s ease; }
+/* Parts non tirées estompées : le fond pâlit, le texte reste lisible (≥ 4,5:1) */
+.won .segment:not(.winner) > path, .won .segment:not(.winner) > circle { fill-opacity: 0.5; }
+.won .segment:not(.winner) text { opacity: 0.8; }
+:global(.dark) .won .segment:not(.winner) > path, :global(.dark) .won .segment:not(.winner) > circle { fill-opacity: 0.85; }
+:global(.dark) .won .segment:not(.winner) text { opacity: 1; }
 .label {
   font-family: inherit;
   pointer-events: none;

@@ -16,14 +16,17 @@ export function wedgePath(radius: number, startDeg: number, endDeg: number): str
 }
 
 /** Pointes (rayon `outer`) et creux (rayon `inner`) alternés, première pointe en haut. */
+/** Arrondi au centième : les derniers chiffres de Math.cos/sin varient entre Node et le navigateur. */
+const round2 = (value: number) => Math.round(value * 100) / 100
+
 export function starPoints(cx: number, cy: number, branches: number, outer: number, inner: number): Point[] {
   const points: Point[] = []
   const step = (Math.PI * 2) / branches
   for (let i = 0; i < branches; i++) {
     const tip = i * step - Math.PI / 2
-    points.push({ x: cx + Math.cos(tip) * outer, y: cy + Math.sin(tip) * outer })
+    points.push({ x: round2(cx + Math.cos(tip) * outer), y: round2(cy + Math.sin(tip) * outer) })
     const hollow = tip + step / 2
-    points.push({ x: cx + Math.cos(hollow) * inner, y: cy + Math.sin(hollow) * inner })
+    points.push({ x: round2(cx + Math.cos(hollow) * inner), y: round2(cy + Math.sin(hollow) * inner) })
   }
   return points
 }

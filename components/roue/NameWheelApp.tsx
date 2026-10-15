@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import { useDraw } from "@/hooks/useDraw"
 import { useNameFact } from "@/hooks/useNameFact"
+import { useShowExtras } from "@/hooks/useShowExtras"
 import { useNameHistory } from "@/hooks/useNameHistory"
 import { useNamesUrlState } from "@/hooks/useNamesUrlState"
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion"
@@ -70,7 +71,8 @@ export function NameWheelApp() {
   const onIntroSettle = useCallback(() => setIntro((s) => (s === "playing" || s === "revealing" ? "settled" : s)), [])
   const onIntroExited = useCallback(() => setIntro("done"), [])
   const introActive = intro === "playing" || intro === "revealing"
-  const fact = useNameFact(selected)
+  const [showExtras, setShowExtras] = useShowExtras()
+  const fact = useNameFact(showExtras ? selected : null)
 
   const finaleTimerRef = useRef<number | null>(null)
   const resultRootRef = useRef<HTMLDivElement>(null)
@@ -378,6 +380,7 @@ export function NameWheelApp() {
                 finalistName={finaleReady ? names[0] : null}
                 timer={timer}
                 fact={fact}
+                showExtras={showExtras}
                 onRemove={() => removeSelected(false)}
                 onRemoveAndSpin={() => removeSelected(true)}
                 onFinish={finishRound}
@@ -400,6 +403,8 @@ export function NameWheelApp() {
         onClear={clearNames}
         onResumeLastList={resumeLastList}
         returnFocusRef={drawerOpenerRef}
+        showExtras={showExtras}
+        onShowExtrasChange={setShowExtras}
       />
 
       {intro !== "done" && (

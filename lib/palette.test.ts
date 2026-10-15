@@ -13,8 +13,15 @@ describe("contrastRatio", () => {
 })
 
 describe("PASTELS", () => {
-  it("contient 8 teintes", () => {
-    expect(PASTELS).toHaveLength(8)
+  it("contient 12 teintes distinctes", () => {
+    expect(PASTELS).toHaveLength(12)
+    expect(new Set(PASTELS.map((s) => s.bg)).size).toBe(12)
+  })
+
+  it("reste visible sur le fond blanc de la page (pastel, mais pas délavé)", () => {
+    for (const swatch of PASTELS) {
+      expect(contrastRatio(swatch.bg, "#FFFFFF")).toBeGreaterThanOrEqual(1.2)
+    }
   })
 
   it("garantit un contraste RGAA ≥ 4,5:1 entre le texte et le fond", () => {
@@ -39,6 +46,15 @@ describe("colorsFor", () => {
       for (let i = 1; i < n; i++) expect(colors[i].id).not.toBe(colors[i - 1].id)
       if (n >= 3) expect(colors[n - 1].id).not.toBe(colors[0].id)
     }
+  })
+
+  it("donne une couleur différente à chacun tant que la palette suffit", () => {
+    for (let n = 1; n <= PASTELS.length; n++) {
+      const colors = colorsFor(POOL.slice(0, n))
+      expect(new Set(colors.map((c) => c.id)).size).toBe(n)
+    }
+    const six = colorsFor(["Johan", "Benjamin", "Tristan", "Jordan", "Eloge", "Antoine"])
+    expect(new Set(six.map((c) => c.id)).size).toBe(6)
   })
 
   it("renvoie une liste vide pour une roue vide", () => {

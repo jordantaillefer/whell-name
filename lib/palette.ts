@@ -2,16 +2,25 @@ import { nameKey } from "./names"
 
 export type Swatch = { id: string; bg: string; ink: string }
 
-/** Teintes 925 de la palette illustrative DSFR + texte foncé de la même famille. */
+/**
+ * Pastels inspirés de la palette illustrative DSFR, un cran plus saturés que
+ * les teintes 925 pour rester lisibles sur fond blanc. Texte ≥ 6:1 sur chaque
+ * fond. L'ordre alterne chaud / froid pour que deux teintes voisines dans la
+ * liste restent bien différentes.
+ */
 export const PASTELS: readonly Swatch[] = [
-  { id: "bleu", bg: "#E3E3FD", ink: "#000091" },
-  { id: "menthe", bg: "#C3FAD5", ink: "#1F5C3A" },
-  { id: "tuile", bg: "#FEE9E5", ink: "#8D3A2B" },
-  { id: "tilleul", bg: "#FEF7DA", ink: "#5E5A2A" },
-  { id: "glycine", bg: "#FEE7FC", ink: "#6E445A" },
-  { id: "archipel", bg: "#C7F6FC", ink: "#00585E" },
-  { id: "cafe-creme", bg: "#F7EBE5", ink: "#6B4532" },
-  { id: "cumulus", bg: "#E6EEFE", ink: "#2F3E66" },
+  { id: "bleu-france", bg: "#CACAFB", ink: "#000091" },
+  { id: "menthe", bg: "#B3F0E4", ink: "#0B544A" },
+  { id: "tuile", bg: "#FDCFC4", ink: "#87301F" },
+  { id: "tilleul", bg: "#F4E89B", ink: "#544A0C" },
+  { id: "glycine", bg: "#F7C8F1", ink: "#6A275E" },
+  { id: "archipel", bg: "#B4EBF5", ink: "#00525C" },
+  { id: "tournesol", bg: "#FDDB9E", ink: "#6A4200" },
+  { id: "emeraude", bg: "#BDF0C9", ink: "#155A30" },
+  { id: "macaron", bg: "#FCCFD8", ink: "#8A2238" },
+  { id: "cumulus", bg: "#C4DAFB", ink: "#1D4080" },
+  { id: "bourgeon", bg: "#D8F2B0", ink: "#3A5710" },
+  { id: "cafe-creme", bg: "#EBD9C3", ink: "#5C3F22" },
 ]
 
 /** FNV-1a 32 bits. */
@@ -26,15 +35,16 @@ export function hashString(input: string): number {
 
 /**
  * Couleur dérivée du nom (stable d'une session à l'autre), décalée à la
- * teinte suivante si elle est identique au voisin précédent — ou, pour le
- * dernier nom, au premier (la roue boucle).
+ * teinte suivante si elle est déjà prise — tant qu'il reste des teintes
+ * libres — ou identique au voisin précédent, ou, pour le dernier nom, au
+ * premier (la roue boucle).
  */
 export function colorsFor(names: readonly string[]): Swatch[] {
   const count = PASTELS.length
   const indexes: number[] = []
 
   names.forEach((name, i) => {
-    const avoid = new Set<number>()
+    const avoid = new Set<number>(indexes.length < count ? indexes : [])
     if (i > 0) avoid.add(indexes[i - 1])
     if (i === names.length - 1 && names.length > 2) avoid.add(indexes[0])
 

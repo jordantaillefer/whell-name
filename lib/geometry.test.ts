@@ -27,6 +27,13 @@ describe("starPoints", () => {
     expect(points[0].y).toBeCloseTo(10)
     expect(Math.hypot(points[1].x - 100, points[1].y - 100)).toBeCloseTo(36)
   })
+
+  it("arrondit au centième, pour un rendu identique serveur et navigateur", () => {
+    for (const p of starPoints(210, 210, 6, 200, 80)) {
+      expect(Math.round(p.x * 100) / 100).toBe(p.x)
+      expect(Math.round(p.y * 100) / 100).toBe(p.y)
+    }
+  })
 })
 
 describe("labelFontSize", () => {

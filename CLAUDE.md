@@ -28,10 +28,11 @@ Pas de configuration ESLint : ne pas lancer `npm run lint` (assistant interactif
   - `useSpeakingTimer` — minuteur 2 min, démarrage auto.
   - `useSessionLog` — ordre de passage, mémoire seulement.
   - `useNameHistory` — `localStorage` `roue-des-noms:history:v1`, 30 noms max, « dernière liste » ; les noms d'un lien partagé sont comptés une fois au chargement.
+  - `useShowExtras` — afficher/masquer « Le saviez-vous ? » et l'horoscope (`localStorage` `roue-des-noms:extras:v1`, affichés par défaut), réglable dans le panneau Participants.
   - `useNameFact`, `usePrefersReducedMotion`.
 - Logique pure testée (`lib/`) :
   - `names` — normalisation, déduplication, URL.
-  - `palette` — 8 pastels DSFR, couleur stable par nom, jamais deux voisins identiques.
+  - `palette` — 12 pastels inspirés DSFR (texte ≥ 6:1), couleur stable par nom, toutes différentes tant que la palette suffit, jamais deux voisins identiques.
   - `geometry`, `spin` — angles en degrés (repère SVG), part 0 sous le pointeur au repos.
   - `history`, `timer`, `sessionLog`.
 - Anecdotes : `lib/nameFacts/` + route `app/api/name-fact`.
