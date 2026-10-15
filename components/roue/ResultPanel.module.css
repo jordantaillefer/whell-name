@@ -12,7 +12,8 @@
 }
 .emptyTitle { display: block; margin-bottom: 6px; font-size: 20px; font-weight: 700; color: var(--rn-text); }
 .emptyAction {
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
   align-items: center;
   gap: 8px;
   margin-top: 16px;

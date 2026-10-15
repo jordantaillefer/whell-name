@@ -3,24 +3,24 @@ import { nameKey } from "./names"
 export type Swatch = { id: string; bg: string; ink: string }
 
 /**
- * Pastels inspirés de la palette illustrative DSFR, un cran plus saturés que
- * les teintes 925 pour rester lisibles sur fond blanc. Texte ≥ 6:1 sur chaque
- * fond. L'ordre alterne chaud / froid pour que deux teintes voisines dans la
- * liste restent bien différentes.
+ * Pastels de la palette illustrative DSFR (teintes 925-950) + texte foncé de
+ * la même famille, ≥ 7:1 sur chaque fond pour rester lisible une fois la part
+ * estompée. L'ordre alterne chaud / froid pour que deux teintes voisines dans
+ * la liste restent bien différentes.
  */
 export const PASTELS: readonly Swatch[] = [
-  { id: "bleu-france", bg: "#CACAFB", ink: "#000091" },
-  { id: "menthe", bg: "#B3F0E4", ink: "#0B544A" },
-  { id: "tuile", bg: "#FDCFC4", ink: "#87301F" },
-  { id: "tilleul", bg: "#F4E89B", ink: "#544A0C" },
-  { id: "glycine", bg: "#F7C8F1", ink: "#6A275E" },
-  { id: "archipel", bg: "#B4EBF5", ink: "#00525C" },
-  { id: "tournesol", bg: "#FDDB9E", ink: "#6A4200" },
-  { id: "emeraude", bg: "#BDF0C9", ink: "#155A30" },
-  { id: "macaron", bg: "#FCCFD8", ink: "#8A2238" },
-  { id: "cumulus", bg: "#C4DAFB", ink: "#1D4080" },
-  { id: "bourgeon", bg: "#D8F2B0", ink: "#3A5710" },
-  { id: "cafe-creme", bg: "#EBD9C3", ink: "#5C3F22" },
+  { id: "bleu-france", bg: "#E3E3FD", ink: "#000091" },
+  { id: "emeraude", bg: "#C3FAD5", ink: "#1A5232" },
+  { id: "tuile", bg: "#FEE9E5", ink: "#7F3023" },
+  { id: "tilleul", bg: "#FEF7DA", ink: "#4C4818" },
+  { id: "glycine", bg: "#FEE7FC", ink: "#643C51" },
+  { id: "archipel", bg: "#C7F6FC", ink: "#00585E" },
+  { id: "tournesol", bg: "#FEECC2", ink: "#6A4200" },
+  { id: "menthe", bg: "#BAFAEE", ink: "#0B544A" },
+  { id: "macaron", bg: "#FDE2E8", ink: "#8A2238" },
+  { id: "cumulus", bg: "#DCE8FE", ink: "#2F3E66" },
+  { id: "bourgeon", bg: "#E6FBCC", ink: "#3A5710" },
+  { id: "cafe-creme", bg: "#F4E9D8", ink: "#5C3F22" },
 ]
 
 /** FNV-1a 32 bits. */

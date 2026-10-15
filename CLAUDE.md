@@ -32,7 +32,7 @@ Pas de configuration ESLint : ne pas lancer `npm run lint` (assistant interactif
   - `useNameFact`, `usePrefersReducedMotion`.
 - Logique pure testée (`lib/`) :
   - `names` — normalisation, déduplication, URL.
-  - `palette` — 12 pastels inspirés DSFR (texte ≥ 6:1), couleur stable par nom, toutes différentes tant que la palette suffit, jamais deux voisins identiques.
+  - `palette` — 12 pastels DSFR (texte ≥ 7:1), couleur stable par nom, toutes différentes tant que la palette suffit, jamais deux voisins identiques.
   - `geometry`, `spin` — angles en degrés (repère SVG), part 0 sous le pointeur au repos.
   - `history`, `timer`, `sessionLog`.
 - Anecdotes : `lib/nameFacts/` + route `app/api/name-fact`.

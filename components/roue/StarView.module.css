@@ -14,6 +14,10 @@
 :global(.dark) .won .branch:not(.winner) text { opacity: 1; }
 .winner { animation: pulse 1s ease-in-out infinite; }
 .label { font-family: inherit; pointer-events: none; }
+/* Liseré blanc autour de l'étoile, comme le bord de la roue */
+.rimEdge, .rim { stroke-linejoin: round; }
+.rimEdge { fill: var(--rn-border); stroke: var(--rn-border); stroke-width: 20; }
+.rim { fill: var(--rn-wheel-ring); stroke: var(--rn-wheel-ring); stroke-width: 18; }
 .hub { fill: var(--rn-blue); stroke: var(--rn-wheel-ring); stroke-width: 2; }
 
 @keyframes pulse {

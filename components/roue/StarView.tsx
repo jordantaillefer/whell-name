@@ -16,6 +16,7 @@ type Props = { names: string[]; colors: Swatch[]; highlightIndex: number | null;
 export function StarView({ names, colors, highlightIndex, winnerIndex }: Props) {
   const count = names.length
   const points = starPoints(C, C, Math.max(count, 1), OUTER, INNER)
+  const outline = `M ${points.map((p) => `${p.x},${p.y}`).join(" L ")} Z`
   const fontSize = count > 8 ? 14 : count > 5 ? 16 : 18
 
   return (
@@ -25,6 +26,12 @@ export function StarView({ names, colors, highlightIndex, winnerIndex }: Props) 
       role="img"
       aria-label={`Étoile avec ${count} participants : ${names.join(", ")}`}
     >
+      {count > 0 && (
+        <>
+          <path d={outline} className={styles.rimEdge} />
+          <path d={outline} className={styles.rim} />
+        </>
+      )}
       {names.map((name, i) => {
         const swatch = colors[i]
         const corners = [points[i * 2], points[(i * 2 + 1) % points.length], { x: C, y: C }, points[(i * 2 - 1 + points.length) % points.length]]
@@ -38,7 +45,8 @@ export function StarView({ names, colors, highlightIndex, winnerIndex }: Props) 
               d={d}
               fill={swatch.bg}
               stroke={highlighted ? "var(--rn-blue)" : win ? swatch.ink : "var(--rn-wheel-ring)"}
-              strokeWidth={highlighted ? 4 : 2}
+              strokeWidth={highlighted ? 4 : 3}
+              strokeLinejoin="round"
             />
             <text
               x={(C + Math.cos(angle) * OUTER * 0.45).toFixed(2)}

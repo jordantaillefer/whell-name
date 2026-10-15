@@ -18,15 +18,17 @@ describe("PASTELS", () => {
     expect(new Set(PASTELS.map((s) => s.bg)).size).toBe(12)
   })
 
-  it("reste visible sur le fond blanc de la page (pastel, mais pas délavé)", () => {
+  it("reste pastel : à peine teinté par rapport au fond blanc", () => {
     for (const swatch of PASTELS) {
-      expect(contrastRatio(swatch.bg, "#FFFFFF")).toBeGreaterThanOrEqual(1.2)
+      const ratio = contrastRatio(swatch.bg, "#FFFFFF")
+      expect(ratio).toBeGreaterThanOrEqual(1.05)
+      expect(ratio).toBeLessThanOrEqual(1.3)
     }
   })
 
-  it("garantit un contraste RGAA ≥ 4,5:1 entre le texte et le fond", () => {
+  it("garantit un contraste ≥ 7:1 entre le texte et le fond (RGAA ≥ 4,5:1, marge pour les parts estompées)", () => {
     for (const swatch of PASTELS) {
-      expect(contrastRatio(swatch.bg, swatch.ink)).toBeGreaterThanOrEqual(4.5)
+      expect(contrastRatio(swatch.bg, swatch.ink)).toBeGreaterThanOrEqual(7)
     }
   })
 })
